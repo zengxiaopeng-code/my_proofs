@@ -1,22 +1,34 @@
 import MyProofs.PosteriorProcess
 
 /-!
-# 背书审计
+# Verification audit
 
-`#print axioms` 列出一个定理**最终依赖的全部公理**。判据：
+`#print axioms` lists the full set of axioms a theorem ultimately depends on. Criterion:
 
-* 只出现 `propext`, `Classical.choice`, `Quot.sound`
-  → 这是 Lean/Mathlib 的标准可信公理，**证明完整、已被内核背书**。
-* 一旦出现 `sorryAx`
-  → 证明里有 `sorry`（或依赖链上有），**尚未背书**。
+* Only `propext`, `Classical.choice`, `Quot.sound` appear
+  → these are Lean/Mathlib's standard trusted axioms; the proof is complete and verified by
+    the kernel.
+* If `sorryAx` appears
+  → there is a `sorry` somewhere on the dependency chain; not yet verified.
 
-这就是"Lean 到底证没证"的机器可查判据——无法造假。
+This is the machine-checkable criterion for "did Lean really prove it" — it cannot be faked.
 -/
 
 open PosteriorProcess
 
--- ✅ 已证：应只依赖 propext / Classical.choice / Quot.sound
-#print axioms testfun_martingale
+-- All four parts of Lemma 1 — each should depend only on
+-- `propext` / `Classical.choice` / `Quot.sound` (no `sorryAx`).
 
--- 🔵 含 sorry：应出现 sorryAx，暴露"还没证"
+-- Existence + kernel property
 #print axioms kernel_exists
+-- (i) Sufficiency
+#print axioms sufficiency
+#print axioms measurable_integral_bounded
+-- (ii) Doob–Dynkin + Δ(Θ) standard Borel (a former Mathlib gap, proved from scratch)
+#print axioms factorization
+#print axioms deltaTheta_polishSpace
+#print axioms deltaTheta_borelSpace
+#print axioms deltaTheta_standardBorel
+#print axioms factorization_posterior
+-- (iii) Martingale property
+#print axioms testfun_martingale

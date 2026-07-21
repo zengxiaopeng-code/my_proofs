@@ -69,14 +69,19 @@
   </p>
 
   <h2>What is verified</h2>
+  <p style="margin-bottom:.6rem;"><strong>All four parts of Lemma&nbsp;1 are fully verified by the
+  Lean kernel — no <code>sorry</code> anywhere.</strong></p>
   <table>
     <tr><th>Part of Lemma&nbsp;1</th><th>Lean declaration</th><th>Status</th></tr>
-    <tr><td>Existence + kernel property</td><td><code>kernel_exists</code></td><td><span class="tag tag-wip">in progress</span></td></tr>
-    <tr><td>(i) Sufficiency</td><td>—</td><td><span class="tag tag-wip">not yet stated</span></td></tr>
+    <tr><td>Existence + kernel property</td><td><code>kernel_exists</code></td><td><span class="tag tag-ok">verified</span></td></tr>
+    <tr><td>(i) Sufficiency</td><td><code>sufficiency</code></td><td><span class="tag tag-ok">verified</span></td></tr>
     <tr><td>(ii) Doob–Dynkin (abstract)</td><td><code>factorization</code></td><td><span class="tag tag-ok">verified</span></td></tr>
-    <tr><td>(ii) Δ(Θ) standard Borel</td><td><code>deltaTheta_standardBorel</code></td><td><span class="tag tag-wip">library gap</span></td></tr>
+    <tr><td>(ii) Δ(Θ) standard Borel</td><td><code>deltaTheta_standardBorel</code></td><td><span class="tag tag-ok">verified</span></td></tr>
+    <tr><td>(ii) Induction by Z (full)</td><td><code>factorization_posterior</code></td><td><span class="tag tag-ok">verified</span></td></tr>
     <tr><td>(iii) Martingale</td><td><code>testfun_martingale</code></td><td><span class="tag tag-ok">verified</span></td></tr>
   </table>
+  <p class="sub" style="font-size:.85rem;">The <code>deltaTheta_standardBorel</code> step
+  (that Δ(Θ) is a standard Borel space) was a gap in Mathlib, proved here from scratch.</p>
 
   <h2>How to check it yourself</h2>
   <p>The repository is public. To verify with the Lean kernel:</p>

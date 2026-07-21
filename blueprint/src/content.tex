@@ -33,7 +33,7 @@ statement is coloured green exactly when the Lean kernel has fully verified it (
 %======================================================================
 \begin{lemma}[Posterior process]\label{lem:posterior-martingale}
     \lean{PosteriorProcess.kernel_exists, PosteriorProcess.factorization_posterior,
-      PosteriorProcess.testfun_martingale}
+      PosteriorProcess.testfun_martingale}\leanok
     \uses{def:setup}
     For each $t\in\mathbb T$, there exists an $\mathcal F_t$-measurable posterior kernel
     $S_t:\Omega\to\Delta(\Theta)$ such that, for every bounded Borel function
@@ -48,7 +48,7 @@ statement is coloured green exactly when the Lean kernel has fully verified it (
     $S_t = f_t(Z_t)$ for some Borel measurable $f_t$;
     \textbf{(iii)} $\{S_t\}_{t\in\mathbb T}$ is a bounded $(\mathcal F_t)$-martingale.
 \end{lemma}
-\begin{proof}
+\begin{proof}\leanok
     \uses{lem:existence, lem:sufficiency, lem:factorization, lem:martingale}
     The statement is the conjunction of the four steps below: existence and the kernel property
     (Lemma~\ref{lem:existence}), sufficiency (Lemma~\ref{lem:sufficiency}, part~(i)),
@@ -61,36 +61,37 @@ statement is coloured green exactly when the Lean kernel has fully verified it (
 % Step 1: existence + kernel property
 %======================================================================
 \begin{lemma}[Existence of the posterior kernel]\label{lem:existence}
-    \lean{PosteriorProcess.kernel_exists}
+    \lean{PosteriorProcess.kernel_exists}\leanok
     \uses{def:setup}
     For each $t$, there exists an $\mathcal F_t$-measurable $S_t:\Omega\to\Delta(\Theta)$ such
     that, for every bounded Borel $\varphi$, the map
     $\omega\mapsto\int_\Theta\varphi\,dS_t(\omega)$ equals
     $\mathbb E[\varphi(\theta)\mid\mathcal F_t]$ almost surely.
 \end{lemma}
-\begin{proof}
+\begin{proof}\leanok
     $\Theta$ compact Polish $\Rightarrow$ standard Borel; the claim follows from the existence
-    of regular conditional distributions (Kallenberg 2002, Thm~6.3).
-    \emph{Lean status:} declared as \texttt{PosteriorProcess.kernel\_exists}; the proof still
-    contains \texttt{sorry} (not yet verified).
+    of regular conditional distributions (Kallenberg 2002, Thm~6.3). In Lean the kernel is the
+    regular conditional distribution \texttt{condDistrib $\theta$ id P} of $\theta$ given
+    $\mathcal F_t$. Verified by the Lean kernel, no \texttt{sorry}.
 \end{proof}
 
 %======================================================================
 % Step 2: (i) sufficiency
 %======================================================================
 \begin{lemma}[Part (i): Sufficiency]\label{lem:sufficiency}
+    \lean{PosteriorProcess.sufficiency}\leanok
     \uses{lem:existence}
     Conditioning on $S_t$ and conditioning on $\mathcal F_t$ yield the same conditional
     distribution of $\theta$; that is, $S_t$ is a sufficient statistic for $\theta$ given
     $\mathcal F_t$.
 \end{lemma}
-\begin{proof}
+\begin{proof}\leanok
     For bounded Borel $\varphi$, the map $F(\mu):=\int\varphi\,d\mu$ is Borel measurable on
     $\Delta(\Theta)$ by the functional monotone class theorem (it holds for continuous $\varphi$
     by the definition of the weak topology, and extends to bounded Borel $\varphi$ by dominated
     convergence). Hence $\mathbb E[\varphi(\theta)\mid\mathcal F_t]=F(S_t)$ is
     $\sigma(S_t)$-measurable, and uniqueness of conditional expectation gives the equality of the
-    two conditional expectations. \emph{Lean status:} not yet formalized (no declaration).
+    two conditional expectations. Verified by the Lean kernel, no \texttt{sorry}.
 \end{proof}
 
 %======================================================================
@@ -107,29 +108,27 @@ statement is coloured green exactly when the Lean kernel has fully verified it (
 \end{proof}
 
 \begin{lemma}[$\Delta(\Theta)$ is standard Borel]\label{lem:deltaTheta-sb}
-    \lean{PosteriorProcess.deltaTheta_standardBorel}
+    \lean{PosteriorProcess.deltaTheta_standardBorel}\leanok
     \uses{def:setup}
     $\Delta(\Theta)$ (Borel probability measures on the compact Polish space $\Theta$, weak
     topology) is a standard Borel space.
 \end{lemma}
-\begin{proof}
-    True mathematically (the space of probability measures on a compact Polish space is again
-    compact Polish). \emph{Lean status:} Mathlib currently lacks the
-    \texttt{PolishSpace}/\texttt{StandardBorelSpace} instance for \texttt{ProbabilityMeasure}, so
-    \texttt{PosteriorProcess.deltaTheta\_standardBorel} contains \texttt{sorry} (library gap).
+\begin{proof}\leanok
+    This was a gap in Mathlib, now proved from scratch in two halves: $\Delta(\Theta)$ carries a
+    Polish topology (compact by Prokhorov + metrizable by Lévy--Prokhorov, hence completely
+    metrizable), and its Giry $\sigma$-algebra coincides with the Borel $\sigma$-algebra of the
+    weak topology. Verified by the Lean kernel, no \texttt{sorry}.
 \end{proof}
 
 \begin{lemma}[Part (ii): Induction by $Z_t$]\label{lem:factorization}
-    \lean{PosteriorProcess.factorization_posterior}
+    \lean{PosteriorProcess.factorization_posterior}\leanok
     \uses{lem:existence, lem:doob-abstract, lem:deltaTheta-sb}
     Since $\mathcal F_t=\sigma(Z_t)$, there is a Borel measurable $f_t:E_t\to\Delta(\Theta)$ with
     $S_t=f_t(Z_t)$ a.s.; the public history $Z_t$ induces the posterior $S_t$.
 \end{lemma}
-\begin{proof}
+\begin{proof}\leanok
     Apply the abstract factorization (Lemma~\ref{lem:doob-abstract}) to $\Delta(\Theta)$, which
-    requires it to be standard Borel (Lemma~\ref{lem:deltaTheta-sb}). \emph{Lean status:}
-    declared as \texttt{factorization\_posterior}; the abstract step is verified, but the whole
-    still depends on the library gap of Lemma~\ref{lem:deltaTheta-sb} and thus contains
+    is standard Borel (Lemma~\ref{lem:deltaTheta-sb}). Verified by the Lean kernel, no
     \texttt{sorry}.
 \end{proof}
 

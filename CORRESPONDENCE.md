@@ -25,9 +25,11 @@ lake env lean MyProofs/PosteriorProcess/Audit.lean # 看 #print axioms：无 sor
 
 | 论文部分 | Lean 声明 | 状态 |
 |---|---|---|
-| 存在性 + 核性质 | `kernel_exists` | 🔵 含 sorry |
-| (i) 充分性 | （未形式化） | ⚪ |
+| 存在性 + 核性质 | `kernel_exists` | ✅ 已证 |
+| (i) 充分性 | `sufficiency` | ✅ 已证 |
 | (ii) Doob–Dynkin（抽象） | `factorization` | ✅ 已证 |
-| (ii) Δ(Θ) 标准 Borel | `deltaTheta_standardBorel` | 🔵 库缺口 sorry |
-| (ii) 完整版 | `factorization_posterior` | 🔵 依赖上者 |
+| (ii) Δ(Θ) 标准 Borel | `deltaTheta_standardBorel` | ✅ 已证（原 Mathlib 库缺口，从零证成）|
+| (ii) 完整版 | `factorization_posterior` | ✅ 已证 |
 | (iii) 鞅 | `testfun_martingale` | ✅ 已证 |
+
+**Lemma 1 全部已形式化，无 `sorry`**；`#print axioms` 只出现标准三公理。

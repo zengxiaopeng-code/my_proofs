@@ -46,3 +46,7 @@ jobs:
         with:
           blueprint: true
           homepage: home_page
+          # 禁用 docs 缓存：缓存里只有部分产物，命中后会部署残缺的 docgen
+          # （声明索引在、但成千上万个 HTML 声明页缺失，链接 404）。
+          # 全量构建 ~45min（public 仓库 Actions 免费），换取完整可用的文档站。
+          use-github-cache: false

@@ -1,0 +1,4 @@
+title: Posterior Process — Lean formalization
+description: Machine-checked formalization of Lemma 1 (Posterior process)
+# 极简 Jekyll 配置：无主题，index.html 作为静态首页原样发布；
+# docgen-action 会把 blueprint web 放到 /blueprint、API 文档放到 /docs。

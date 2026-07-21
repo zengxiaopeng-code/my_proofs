@@ -1,0 +1,48 @@
+name: Deploy blueprint + docs
+
+# 构建并发布到 GitHub Pages：docgen API 文档 + blueprint web + 首页，一步到位。
+#   - checkdecls（由 docgen-action 在 blueprint:true 时执行）：校验 blueprint 里 \lean 的声明都存在。
+#   - 部署到 Pages：首页在根、blueprint 在 /blueprint、API 文档在 /docs。
+# 含 docgen，为整个导入闭包建文档，较慢（~2h）；public 仓库 Actions 分钟免费。
+# 日常快速验证仍由 lean_action_ci.yml 负责（~3min 绿灯）。
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          large-packages: false
+
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Build project
+        uses: leanprover/lean-action@v1
+        with:
+          build: true
+
+      - name: Build docgen + blueprint and deploy to Pages
+        uses: leanprover-community/docgen-action@main
+        with:
+          blueprint: true
+          homepage: home_page

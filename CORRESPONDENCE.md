@@ -104,18 +104,31 @@ theorem kernel_exists (hθ : Measurable θ) (t : ι) :
 
 ---
 
-### 🔵 Part (ii) Doob–Dynkin — `PosteriorProcess.factorization`（已陈述，证明待填）
+### Part (ii) Doob–Dynkin — 形式化揭示的隐藏假设
 
-**论文原文**：$S_t$ 是 $\sigma(Z_t)$-可测、取值标准 Borel 空间，故 $\exists f_t$ Borel，$S_t=f_t(Z_t)$ a.s.
+**论文原文**：$S_t$ 是 $\sigma(Z_t)$-可测、取值**标准 Borel 空间** $\Delta(\Theta)$，故 $\exists f_t$ Borel，$S_t=f_t(Z_t)$ a.s.
 
-**Lean 陈述**：
+形式化时发现，论文这句话打包了**两个独立事实**，Lean 必须分开：
+
+**① `PosteriorProcess.factorization`（抽象 Doob–Dynkin）— ✅ 已证，无 sorry**
 ```lean
-theorem factorization {E : Type*} [MeasurableSpace E]
-    (Z : Ω → E) (S : Ω → Measure Θ)
-    (hS : @Measurable Ω (Measure Θ) (MeasurableSpace.comap Z inferInstance) inferInstance S) :
-    ∃ f : E → Measure Θ, Measurable f ∧ S = f ∘ Z
+theorem factorization {Ω E Δ : Type*} [MeasurableSpace E]
+    [MeasurableSpace Δ] [StandardBorelSpace Δ] [Nonempty Δ]
+    (Z : Ω → E) (S : Ω → Δ)
+    (hS : @Measurable Ω Δ (MeasurableSpace.comap Z inferInstance) inferInstance S) :
+    ∃ f : E → Δ, Measurable f ∧ S = f ∘ Z
 ```
-状态：陈述忠实；证明为 `sorry`。
+给定陪域 `Δ` 标准 Borel，因子分解成立。这就是 Doob–Dynkin 的内容（Mathlib `exists_eq_measurable_comp`）。
+
+**② `PosteriorProcess.deltaTheta_standardBorel`（Δ(Θ) 是标准 Borel）— 🔵 库缺口，sorry**
+论文一句"$\Delta(\Theta)$ 是标准 Borel"（因 Θ 紧 Polish），在 Mathlib 里**不是现成的**：
+库只提供了 `MetrizableSpace (ProbabilityMeasure Θ)`，缺 `PolishSpace` 和 `BorelSpace` 两个实例。
+
+**③ `PosteriorProcess.factorization_posterior`（Δ(Θ) 完整版）**：①②合并。
+`#print axioms` 显示它依赖 `sorryAx`——诚实地暴露唯一缺口就在 ② 的库基础设施。
+
+> **形式化的价值在此显形**：论文证明**没有错**，但它把一个非平凡的库级事实
+> （测度空间的标准 Borel 性）压缩成了一句话。机器逼我们把它单列出来、明确标注"待补"。
 
 ---
 

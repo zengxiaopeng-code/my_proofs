@@ -14,6 +14,8 @@ import MyProofs.PosteriorProcess.Martingale
 |------------------|----------------------------------------|------------|
 | 存在性 + 核性质   | `PosteriorProcess.kernel_exists`       | 🔵 `sorry` |
 | (i) 充分性       | （待陈述）                              | ⚪ 未陈述   |
-| (ii) 因子分解    | `PosteriorProcess.factorization`       | 🔵 `sorry` |
+| (ii) Doob–Dynkin（抽象） | `PosteriorProcess.factorization` | ✅ 已证    |
+| (ii) Δ(Θ) 标准 Borel（库缺口） | `PosteriorProcess.deltaTheta_standardBorel` | 🔵 `sorry` |
+| (ii) 完整版      | `PosteriorProcess.factorization_posterior` | 🔵 依赖上者 |
 | (iii) 鞅性质     | `PosteriorProcess.testfun_martingale`  | ✅ 已证    |
 -/

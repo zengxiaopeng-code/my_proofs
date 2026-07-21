@@ -8,6 +8,9 @@
 👉 **[CORRESPONDENCE.md](CORRESPONDENCE.md)** — 每条命题的论文原文陈述与 Lean 陈述**并排比对** +
 建模选择披露。这是核对"Lean 证的就是论文主张"的地方（不写 Lean 也能读）。
 
+👉 **[docs/paper-model.md](docs/paper-model.md)** — 论文模型设定（environment / signal 等）的**原文存档** +
+对象→Lean 类型对照。形式化的"论文源"。
+
 ## 当前进度：Lemma 1「Posterior process」
 
 命名空间 `PosteriorProcess` 一一对应论文 Lemma 1；文件夹 [`MyProofs/PosteriorProcess/`](MyProofs/PosteriorProcess/) 每个文件一个子结论。

@@ -20,3 +20,6 @@ open PosteriorProcess
 
 -- 🔵 含 sorry：应出现 sorryAx，暴露"还没证"
 #print axioms kernel_exists
+
+-- ✅ 已证：论文 (i) 脚注的反证（1_ℚ 非连续函数逐点极限）；应无 sorryAx
+#print axioms indicatorRat_not_pointwiseLimit_continuous

@@ -1,11 +1,16 @@
-% Blueprint 内容：镜像论文结构（节点 = 论文的定义/引理/命题，一一对应）。
-% \lean{...} 链接 Lean 声明，\uses{...} 标依赖，\leanok 表示已被 Lean 背书。
-% 逐部分的 Lean 进度与逐符号对照见 CORRESPONDENCE.md。
+% Blueprint 内容：分解式节点（行内标准）。
+%   \lean{声明}  链接到具体 Lean 声明（checkdecls 会校验存在）。
+%   \leanok      仅用于「已被 Lean 内核完整证明、无 sorry」的节点 → 依赖图中显示为绿。
+%                含 sorry / 库缺口的节点只给 \lean 链接、不给 \leanok，并在正文明写状态。
+%   \uses{...}   标依赖，生成依赖图的边。
+% 命题与证明的逐字原文见 docs/paper-lemma1.md（唯一权威来源）；本章为其形式化分解。
 
 \chapter{Lemma 1: Posterior process}
 
 本章形式化论文的 \textbf{Lemma 1 (Posterior process)}（论文标签
-\texttt{lem:posterior-martingale}）。节点与论文一一对应；读者可直接按标题对回原文。
+\texttt{lem:posterior-martingale}）。\textbf{命题与证明的逐字原文见 \texttt{docs/paper-lemma1.md}}；
+本章把该证明**按论文自身的四步分解成独立节点**，每个节点链接到它对应的 Lean 声明，
+并按是否被 Lean 内核完整证明标注状态（绿色 = 无 \texttt{sorry}，已背书）。读者可点开任一节点核对它证的是什么、以及 Lean 有没有真的证完。
 
 \begin{definition}[Environment]\label{def:setup}
     离散时间 $t\in\mathbb T=\{0,1,2,\dots\}$。Borel 概率空间 $(\Omega,\mathcal F,\mathbb P)$，
@@ -14,9 +19,10 @@
     $\mathcal F_0$ 平凡。
 \end{definition}
 
+%======================================================================
+% 主命题（逐字原文），其证明拆为下面四个步骤节点。
+%======================================================================
 \begin{lemma}[Posterior process]\label{lem:posterior-martingale}
-    \lean{PosteriorProcess.kernel_exists, PosteriorProcess.factorization_posterior,
-      PosteriorProcess.testfun_martingale}
     \uses{def:setup}
     For each $t\in\mathbb T$, there exists an $\mathcal F_t$-measurable posterior kernel
     $S_t:\Omega\to\Delta(\Theta)$ such that, for every bounded Borel function
@@ -26,94 +32,110 @@
         = \mathbb E[\varphi(\theta)\mid\mathcal F_t](\omega)\qquad\text{a.s.}
     \]
     In particular:
-
-    \textbf{(i)} $S_t$ is a sufficient statistic for $\theta$ given $\mathcal F_t$:
-    conditioning on $S_t$ and conditioning on $\mathcal F_t$ yield the same conditional
-    distribution of $\theta$.
-
-    \textbf{(ii)} Since $\mathcal F_t = \sigma(Z_t)$, the Doob--Dynkin lemma implies that
-    $S_t = f_t(Z_t)$ for some Borel measurable function $f_t$; that is, the public history
-    $Z_t$ induces the posterior $S_t$.
-
+    \textbf{(i)} $S_t$ is a sufficient statistic for $\theta$ given $\mathcal F_t$;
+    \textbf{(ii)} since $\mathcal F_t = \sigma(Z_t)$, the Doob--Dynkin lemma implies that
+    $S_t = f_t(Z_t)$ for some Borel measurable $f_t$;
     \textbf{(iii)} $\{S_t\}_{t\in\mathbb T}$ is a bounded $(\mathcal F_t)$-martingale.
 \end{lemma}
-% 证明正文 = 论文逐字原文（英文，未改）。权威档案见 docs/paper-lemma1.md；
-% 每部分对应的 Lean 声明与验证状态，另见证明后的“形式化状态”段与 CORRESPONDENCE.md。
 \begin{proof}
-    \uses{def:setup}
-    \emph{Existence of the posterior kernel.}\quad
-    Since $\Theta$ is a compact Polish space, $\Delta(\Theta)$ equipped with the weak topology
-    is also a compact Polish space, hence a standard Borel space. The map $\theta:\Omega\to\Theta$
-    is $\mathcal F$-measurable and $\mathcal F_t\subseteq\mathcal F$ is a sub-$\sigma$-algebra. By
-    the standard theorem on regular conditional distributions for Polish-space-valued random
-    variables (Kallenberg 2002, Theorem~6.3), there exists a Markov kernel
-    $S_t:\Omega\times\mathcal B(\Theta)\to[0,1]$ such that \textbf{(a)}
-    $\omega\mapsto S_t(\omega)(B)$ is $\mathcal F_t$-measurable for every $B\in\mathcal B(\Theta)$,
-    and \textbf{(b)} $S_t(\omega)(\cdot)=\mathbb P(\theta\in\cdot\mid\mathcal F_t)(\omega)$
-    $\mathbb P$-a.s. Equivalently, for every bounded Borel $\varphi:\Theta\to\mathbb R$,
-    \[
-      \int_\Theta\varphi(\theta')\,S_t(\omega)(d\theta')
-        =\mathbb E[\varphi(\theta)\mid\mathcal F_t](\omega)\qquad\text{a.s.}
-        \qquad(\star)
-    \]
-
-    \emph{Part (i): Sufficiency.}\quad
-    Fix any bounded Borel $\varphi:\Theta\to\mathbb R$ and define $F:\Delta(\Theta)\to\mathbb R$
-    by $F(\mu):=\int_\Theta\varphi(\theta')\,\mu(d\theta')$. By the functional monotone class
-    theorem, $F$ is Borel measurable on $\Delta(\Theta)$: it holds for continuous $\varphi$ by
-    the definition of the weak topology, and extends to all bounded Borel $\varphi$ by dominated
-    convergence.\footnote{Explicitly: every bounded Borel function is the pointwise limit of a
-    uniformly bounded sequence of continuous functions (by Lusin's theorem and dominated
-    convergence), so $F(\mu)=\lim_n\int\varphi_n\,d\mu$ is a pointwise limit of Borel measurable
-    functions, hence Borel measurable.} Therefore $\omega\mapsto F(S_t(\omega))$ is
-    $\sigma(S_t)$-measurable. By $(\star)$, $\mathbb E[\varphi(\theta)\mid\mathcal F_t](\omega)
-    =F(S_t(\omega))$ a.s., so $\mathbb E[\varphi(\theta)\mid\mathcal F_t]$ is
-    $\sigma(S_t)$-measurable. For any $B\in\sigma(S_t)\subseteq\mathcal F_t$,
-    \[
-      \mathbb E\bigl[\varphi(\theta)\mathbf 1_B\bigr]
-        =\mathbb E\bigl[\mathbb E[\varphi(\theta)\mid\mathcal F_t]\mathbf 1_B\bigr]
-        =\mathbb E\bigl[F(S_t)\mathbf 1_B\bigr].
-    \]
-    Since $F(S_t)$ is $\sigma(S_t)$-measurable, uniqueness of conditional expectation gives
-    $\mathbb E[\varphi(\theta)\mid\mathcal F_t]=\mathbb E[\varphi(\theta)\mid S_t]$ a.s. As
-    $\varphi$ was arbitrary, conditioning on $S_t$ and conditioning on $\mathcal F_t$ yield the
-    same conditional distribution of $\theta$.
-
-    \emph{Part (ii): Induction by $Z_t$.}\quad
-    Since $\mathcal F_t=\sigma(Z_t)$ and $S_t$ is $\sigma(Z_t)$-measurable with values in the
-    standard Borel space $\Delta(\Theta)$, the Doob--Dynkin lemma (Kallenberg 2002, Lemma~1.14)
-    yields a Borel measurable function $f_t:E_t\to\Delta(\Theta)$ such that
-    $S_t(\omega)=f_t(Z_t(\omega))$ $\mathbb P$-a.s. Hence $Z_t$ induces the posterior $S_t$
-    through the measurable map $f_t$.
-
-    \emph{Part (iii): Martingale property.}\quad
-    Fix $s\le t$ and any bounded Borel $\varphi:\Theta\to\mathbb R$. Then
-    \[
-      \mathbb E\!\left[\int_\Theta\varphi(\theta')\,S_t(\omega)(d\theta')\,\Big|\,\mathcal F_s\right]
-        =\mathbb E\bigl[\mathbb E[\varphi(\theta)\mid\mathcal F_t]\mid\mathcal F_s\bigr]
-        =\mathbb E[\varphi(\theta)\mid\mathcal F_s]
-        =\int_\Theta\varphi(\theta')\,S_s(\omega)(d\theta')\quad\text{a.s.},
-    \]
-    where the first and last equalities use $(\star)$, and the middle equality uses the tower
-    property of conditional expectations together with $\mathcal F_s\subseteq\mathcal F_t$. Since
-    $\varphi$ was arbitrary, $\mathbb E[S_t\mid\mathcal F_s]=S_s$ a.s. in $\Delta(\Theta)$.
-    Boundedness holds because $S_t(\omega)$ is a probability measure: for every bounded $\varphi$,
-    $\bigl|\int_\Theta\varphi\,dS_t\bigr|\le\|\varphi\|_\infty<\infty$.
+    \uses{lem:existence, lem:sufficiency, lem:factorization, lem:martingale}
+    命题是以下四步之合取：存在性与核性质（引理~\ref{lem:existence}）、充分性
+    （引理~\ref{lem:sufficiency}，即 (i)）、由 $Z_t$ 因子分解（引理~\ref{lem:factorization}，即 (ii)）、
+    鞅性质（引理~\ref{lem:martingale}，即 (iii)）。逐字证明见 \texttt{docs/paper-lemma1.md}。
 \end{proof}
 
-\bigskip
-\noindent\textbf{形式化状态}（与上述证明分开陈述，避免干扰阅读；逐符号对照见
-\texttt{CORRESPONDENCE.md}）。各部分对应的 Lean 声明及其内核验证情况：
+%======================================================================
+% 步骤 1：存在性 + 核性质
+%======================================================================
+\begin{lemma}[Existence of the posterior kernel]\label{lem:existence}
+    \lean{PosteriorProcess.kernel_exists}
+    \uses{def:setup}
+    对每个 $t$，存在 $\mathcal F_t$-可测的 $S_t:\Omega\to\Delta(\Theta)$，使得对每个有界 Borel
+    $\varphi$，$\;\omega\mapsto\int_\Theta\varphi\,dS_t(\omega)$ 与
+    $\mathbb E[\varphi(\theta)\mid\mathcal F_t]$ 几乎处处相等。
+\end{lemma}
+\begin{proof}
+    $\Theta$ 紧 Polish $\Rightarrow$ 标准 Borel，由正则条件分布（Kallenberg 2002, Thm~6.3）即得。
+    \emph{Lean 状态}：声明为 \texttt{PosteriorProcess.kernel\_exists}，**证明尚含 \texttt{sorry}**（未背书）。
+\end{proof}
 
-\begin{itemize}
-  \item \emph{存在性}：\texttt{kernel\_exists}——命题已按论文陈述形式化，证明待填。
-  \item \emph{(i) 充分性}：尚未形式化。
-  \item \emph{(ii) 因子分解}：\texttt{factorization\_posterior}；其抽象 Doob--Dynkin 步骤
-    \texttt{factorization} 已由 Lean 内核完整验证，整体仍依赖“$\Delta(\Theta)$ 为标准 Borel
-    空间”这一当前 Mathlib 库缺口。
-  \item \emph{(iii) 鞅}：\texttt{testfun\_martingale}——已由 Lean 内核完整验证（无 \texttt{sorry}）。
-\end{itemize}
+%======================================================================
+% 步骤 2：(i) 充分性
+%======================================================================
+\begin{lemma}[Part (i): Sufficiency]\label{lem:sufficiency}
+    \uses{lem:existence}
+    在 $S_t$ 上取条件与在 $\mathcal F_t$ 上取条件给出 $\theta$ 相同的条件分布；即 $S_t$ 是
+    $\theta$ 关于 $\mathcal F_t$ 的充分统计量。
+\end{lemma}
+\begin{proof}
+    \uses{lem:footnote}
+    对有界 Borel $\varphi$，$F(\mu):=\int\varphi\,d\mu$ 在 $\Delta(\Theta)$ 上 Borel 可测
+    （泛函单调类定理：对连续 $\varphi$ 由弱拓扑定义成立，再由控制收敛延拓到有界 Borel）。
+    故 $\mathbb E[\varphi(\theta)\mid\mathcal F_t]=F(S_t)$ 是 $\sigma(S_t)$-可测，由条件期望唯一性得两条件期望相等。
+    \emph{Lean 状态}：**尚未形式化**（无对应声明）。\emph{另见}引理~\ref{lem:footnote}：论文此处一条脚注的错误已被 Lean 反证。
+\end{proof}
 
-\noindent\emph{人工审查笔记（与 Lean 验证无关）}：论文 (i) 的脚注断言“有界 Borel 函数是一致有界
-连续函数序列的逐点极限”。该断言不成立（Baire 第一类；$\mathbf 1_{\mathbb Q}$ 为反例），建议在论文中
-删除此脚注——正文的泛函单调类论证本身正确，(i) 的结论不受影响。
+%======================================================================
+% 步骤 3：(ii) Doob–Dynkin —— 抽象层（已证）+ 库缺口 + 完整版
+%======================================================================
+\begin{lemma}[Abstract Doob--Dynkin factorization]\label{lem:doob-abstract}
+    \lean{PosteriorProcess.factorization}\leanok
+    若 $S$ 关于 $\sigma(Z)$ 可测、取值于标准 Borel 空间，则存在 Borel 可测 $f$ 使得 $S=f\circ Z$。
+\end{lemma}
+\begin{proof}\leanok
+    Mathlib 的 \texttt{Measurable.exists\_eq\_measurable\_comp}。**已由 Lean 内核完整证明（无 \texttt{sorry}）。**
+\end{proof}
+
+\begin{lemma}[$\Delta(\Theta)$ is standard Borel]\label{lem:deltaTheta-sb}
+    \lean{PosteriorProcess.deltaTheta_standardBorel}
+    \uses{def:setup}
+    $\Delta(\Theta)$（$\Theta$ 紧 Polish 上的概率测度，弱拓扑）是标准 Borel 空间。
+\end{lemma}
+\begin{proof}
+    数学上成立（紧 Polish 上概率测度空间仍是紧 Polish）。\emph{Lean 状态}：当前 Mathlib
+    缺 \texttt{ProbabilityMeasure} 的相应 \texttt{PolishSpace}/\texttt{StandardBorelSpace} 实例，
+    故声明 \texttt{PosteriorProcess.deltaTheta\_standardBorel} 的**证明含 \texttt{sorry}（库缺口）**。
+\end{proof}
+
+\begin{lemma}[Part (ii): Induction by $Z_t$]\label{lem:factorization}
+    \lean{PosteriorProcess.factorization_posterior}
+    \uses{lem:existence, lem:doob-abstract, lem:deltaTheta-sb}
+    由于 $\mathcal F_t=\sigma(Z_t)$，存在 Borel 可测 $f_t:E_t\to\Delta(\Theta)$ 使得
+    $S_t=f_t(Z_t)$ a.s.；即公开历史 $Z_t$ 诱导后验 $S_t$。
+\end{lemma}
+\begin{proof}
+    把抽象因子分解（引理~\ref{lem:doob-abstract}）用到 $\Delta(\Theta)$ 上，需后者为标准 Borel
+    （引理~\ref{lem:deltaTheta-sb}）。\emph{Lean 状态}：声明为 \texttt{factorization\_posterior}，
+    抽象步骤已证，但整体**经由引理~\ref{lem:deltaTheta-sb} 的库缺口仍含 \texttt{sorry}**。
+\end{proof}
+
+%======================================================================
+% 步骤 4：(iii) 鞅性质（已证）
+%======================================================================
+\begin{lemma}[Part (iii): Martingale property]\label{lem:martingale}
+    \lean{PosteriorProcess.testfun_martingale}\leanok
+    \uses{lem:existence}
+    对每个有界 Borel $\varphi$，实值过程 $t\mapsto\int_\Theta\varphi\,dS_t$ 是
+    $(\mathcal F_t)$-鞅；从而 $\{S_t\}$ 是有界测度值鞅。
+\end{lemma}
+\begin{proof}\leanok
+    由塔性质：$\mathbb E[\int\varphi\,dS_t\mid\mathcal F_s]
+    =\mathbb E[\varphi(\theta)\mid\mathcal F_s]=\int\varphi\,dS_s$（$s\le t$）。Mathlib 的
+    \texttt{martingale\_condExp}。**已由 Lean 内核完整证明（无 \texttt{sorry}）。**
+\end{proof}
+
+%======================================================================
+% 审查：论文 (i) 脚注的错误 —— 已由 Lean 反证
+%======================================================================
+\begin{lemma}[Refutation of the Part (i) footnote]\label{lem:footnote}
+    \lean{PosteriorProcess.indicatorRat_not_pointwiseLimit_continuous}\leanok
+    有理数示性函数 $\mathbf 1_{\mathbb Q}$（有界 Borel）**不是**任何连续函数列的逐点极限。
+    因此论文 (i) 的脚注断言“有界 Borel 函数 $=$ 一致有界连续函数列的逐点极限”**不成立**。
+\end{lemma}
+\begin{proof}\leanok
+    自足的 Baire 纲反证：若 $g_n\to\mathbf 1_{\mathbb Q}$ 逐点，则 $\mathbb R$ 被可数个闭集
+    $A_N=\{x:\forall n\ge N,\ \tfrac12\le g_n(x)\}$、$B_N=\{x:\forall n\ge N,\ g_n(x)\le\tfrac12\}$ 覆盖；
+    由 Baire 纲某个含非空开集，其中的无理/有理点与极限值矛盾。**已由 Lean 内核完整证明（无 \texttt{sorry}）。**
+    \emph{注}：这不影响 (i) 的结论——正文的泛函单调类论证本身正确（见引理~\ref{lem:sufficiency}）；
+    该脚注只是一条方法有误且非必要的注解，建议在论文中删除。
+\end{proof}

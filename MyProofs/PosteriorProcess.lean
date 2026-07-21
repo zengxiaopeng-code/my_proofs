@@ -3,6 +3,7 @@ import MyProofs.PosteriorProcess.Existence
 import MyProofs.PosteriorProcess.Sufficiency
 import MyProofs.PosteriorProcess.DoobDynkin
 import MyProofs.PosteriorProcess.Martingale
+import MyProofs.PosteriorProcess.FootnoteBaire
 
 /-!
 # Lemma 1「Posterior process」聚合入口
@@ -18,4 +19,5 @@ import MyProofs.PosteriorProcess.Martingale
 | (ii) Δ(Θ) 标准 Borel（库缺口） | `PosteriorProcess.deltaTheta_standardBorel` | 🔵 `sorry` |
 | (ii) 完整版      | `PosteriorProcess.factorization_posterior` | 🔵 依赖上者 |
 | (iii) 鞅性质     | `PosteriorProcess.testfun_martingale`  | ✅ 已证    |
+| (i) 脚注反证（审查）| `PosteriorProcess.indicatorRat_not_pointwiseLimit_continuous` | ✅ 已证 |
 -/

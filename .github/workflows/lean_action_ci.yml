@@ -1,15 +1,14 @@
 name: Lean Action CI
 
+# 每次推送/PR 都跑：只做“验证证明”这一件事，几分钟绿灯。
+# 文档生成（docgen，~2h）已拆到单独的手动 workflow：docs.yml。
 on:
   push:
   pull_request:
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: read # Read access to repository contents
-  pages: write # Write access to GitHub Pages
-  id-token: write # Write access to ID tokens
+  contents: read
 
 jobs:
   build:
@@ -18,20 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # 行内规矩①：禁止 `import Mathlib`，强制精确导入（模仿 PFR/FLT）。
+      # 行内规矩：禁止 `import Mathlib`，强制精确导入（模仿 PFR/FLT）。
       # 有任何文件写了裸的 `import Mathlib` 就让 CI 失败。
       - name: Don't 'import Mathlib', use precise imports
         run: |
           ! (find MyProofs -name "*.lean" -type f -print0 | xargs -0 grep -E -n '^import Mathlib$')
 
-      # 行内规矩②：先腾磁盘，否则 docgen 会撑爆 runner（No space left on device）。
-      - name: Free disk space
-        uses: jlumbroso/free-disk-space@main
-        with:
-          large-packages: false
-
-      # 编译并逐条核验所有证明（这一步就是"背书"）。
+      # 编译并逐条核验所有证明（这一步就是“背书”）。
       - uses: leanprover/lean-action@v1
-
-      # 生成可浏览的 Lean API 文档（docgen）。有了①②才跑得动。
-      - uses: leanprover-community/docgen-action@v1

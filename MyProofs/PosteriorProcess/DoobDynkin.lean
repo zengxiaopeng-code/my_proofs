@@ -3,29 +3,30 @@ import Mathlib.MeasureTheory.Measure.ProbabilityMeasure
 import Mathlib.MeasureTheory.Constructions.Polish.Basic
 
 /-!
-# Lemma 1 (Posterior process) · Part (ii)：Doob–Dynkin 因子分解
+# Lemma 1 (Posterior process): factorization through Z (Part (ii))
 
-## 论文原文
-Lemma 1 的命题与证明（含本 Part (ii)）的**逐字原文见 `docs/paper-lemma1.md`**（唯一权威来源）。
+Part of **Lemma 1 (Posterior process)** of the paper. The verbatim statement and proof are in
+`docs/paper-lemma1.md` (the single source of truth).
 
-## 形式化揭示的结构：论文这一句打包了两个独立事实
-1. **Doob–Dynkin 本身**（`factorization`）：σ(Z)-可测 + 陪域标准 Borel ⇒ 因子分解。
-   Mathlib 有 `Measurable.exists_eq_measurable_comp`。**已证 ✅（无 sorry）**
-2. **`Δ(Θ)` 是标准 Borel**（`deltaTheta_standardBorel`）：因 Θ 紧 Polish。
-   **Mathlib 缺口**：只给了 `MetrizableSpace (ProbabilityMeasure Θ)`，缺
-   `PolishSpace (ProbabilityMeasure Θ)` 和 `BorelSpace (ProbabilityMeasure Θ)`
-   两个实例（二者合成才是 StandardBorel）。**待补 🔵（sorry）**
+The formalization reveals that the paper's single sentence packs two independent facts:
 
-`factorization_posterior` 把两者合起来 = 论文 Δ(Θ) 版本的完整 Part (ii)。
+1. Doob–Dynkin itself (`factorization`): `σ(Z)`-measurable + standard-Borel codomain ⇒
+   factorization. Given by Mathlib's `Measurable.exists_eq_measurable_comp`. Proved (no `sorry`).
+2. `Δ(Θ)` is standard Borel (`deltaTheta_standardBorel`), because `Θ` is compact Polish. This is
+   a Mathlib gap: only `MetrizableSpace (ProbabilityMeasure Θ)` is available; the `PolishSpace`
+   and `BorelSpace` instances (whose combination is StandardBorel) are missing. Not yet filled
+   in (`sorry`).
+
+`factorization_posterior` combines the two = the paper's `Δ(Θ)` version of Part (ii).
 -/
 
 open MeasureTheory
 
 namespace PosteriorProcess
 
-/-- **Part (ii) 的 Doob–Dynkin 内容（抽象版，已证）**。
-若 `S : Ω → Δ` 关于 `σ(Z)` 可测（`Z : Ω → E`），且陪域 `Δ` 是**标准 Borel 空间**，
-则存在可测 `f : E → Δ` 使 `S = f ∘ Z`。直接由 Mathlib 的 Doob–Dynkin 引理给出。 -/
+/-- Doob–Dynkin factorization (the abstract content of Part (ii); proved). If `S : Ω → Δ` is
+measurable w.r.t. `σ(Z)` (`Z : Ω → E`) and the codomain `Δ` is a standard Borel space, then
+`S = f ∘ Z` for some measurable `f : E → Δ`. Directly from Mathlib's Doob–Dynkin lemma. -/
 theorem factorization {Ω E Δ : Type*} [MeasurableSpace E]
     [MeasurableSpace Δ] [StandardBorelSpace Δ] [Nonempty Δ]
     (Z : Ω → E) (S : Ω → Δ)
@@ -33,17 +34,18 @@ theorem factorization {Ω E Δ : Type*} [MeasurableSpace E]
     ∃ f : E → Δ, Measurable f ∧ S = f ∘ Z :=
   hS.exists_eq_measurable_comp
 
-/-- **库缺口（待补）**：Θ 紧 Polish ⇒ `Δ(Θ) = ProbabilityMeasure Θ` 是标准 Borel。
-需要在 Mathlib 现有 `MetrizableSpace (ProbabilityMeasure Θ)` 基础上补出
-`PolishSpace` 与 `BorelSpace` 两个实例。这是一个独立的小型基础设施项目
-（或可上游贡献给 Mathlib）。 -/
+/-- Library gap (not yet filled in): `Θ` compact Polish ⇒ `Δ(Θ) = ProbabilityMeasure Θ` is
+standard Borel. Needs the `PolishSpace` and `BorelSpace` instances for `ProbabilityMeasure` on
+top of Mathlib's existing `MetrizableSpace (ProbabilityMeasure Θ)` — a small, self-contained
+piece of infrastructure (a candidate upstream Mathlib contribution). -/
 theorem deltaTheta_standardBorel (Θ : Type*) [TopologicalSpace Θ] [PolishSpace Θ]
     [CompactSpace Θ] [MeasurableSpace Θ] [BorelSpace Θ] :
     StandardBorelSpace (ProbabilityMeasure Θ) := by
   sorry
 
-/-- **Part (ii) 完整版（Δ(Θ) 版本）**：把抽象 Doob–Dynkin 应用到后验核 `S : Ω → Δ(Θ)`。
-除 `deltaTheta_standardBorel` 的缺口外，其余逻辑完整；`Nonempty (Δ Θ)` 作为温和假设保留。 -/
+/-- Part (ii), full `Δ(Θ)` version: the abstract Doob–Dynkin factorization applied to the
+posterior kernel `S : Ω → Δ(Θ)`. All logic is complete except the `deltaTheta_standardBorel`
+gap; `Nonempty (Δ Θ)` is kept as a mild assumption. -/
 theorem factorization_posterior {Ω E Θ : Type*} [MeasurableSpace E]
     [TopologicalSpace Θ] [PolishSpace Θ] [CompactSpace Θ] [MeasurableSpace Θ] [BorelSpace Θ]
     [Nonempty (ProbabilityMeasure Θ)]

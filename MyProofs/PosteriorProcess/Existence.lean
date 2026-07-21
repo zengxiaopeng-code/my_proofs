@@ -3,20 +3,19 @@ import Mathlib.MeasureTheory.Function.ConditionalExpectation.Basic
 import Mathlib.MeasureTheory.Constructions.Polish.Basic
 
 /-!
-# Lemma 1 (Posterior process) · 存在性 + 核性质 (eq:kernel-property)
+# Lemma 1 (Posterior process): existence of the posterior kernel
 
-## 论文原文
-Lemma 1 的命题与证明（含存在性部分）的**逐字原文见 `docs/paper-lemma1.md`**（唯一权威来源）。
+Part of **Lemma 1 (Posterior process)** of the paper. The verbatim statement and proof are in
+`docs/paper-lemma1.md` (the single source of truth).
 
-## Lean 陈述 ↔ 论文
-| 论文                              | Lean                                            |
-|-----------------------------------|-------------------------------------------------|
-| 后验核 $S_t:\Omega\to\Delta(\Theta)$ | `S : Ω → Measure Θ`，`∀ ω, IsProbabilityMeasure (S ω)` |
-| (a) $\mathcal F_t$-可测            | `Measurable[ℱ t] S`                             |
-| (b)/eq:kernel-property            | `(fun ω => ∫ x, φ x ∂(S ω)) =ᵐ[P] P[(φ ∘ θ) | ℱ t]` |
+This file states the existence of the posterior kernel together with its defining property:
+there is an `ℱ t`-measurable kernel `S : Ω → Measure Θ` (each `S ω` a probability measure) such
+that, for every bounded measurable `φ`, the map `ω ↦ ∫ φ dS(ω)` equals `E[φ(θ) | ℱ t]` almost
+surely.
 
-数学依据：$\Theta$ 紧 Polish ⇒ 标准 Borel ⇒ 正则条件分布存在（Kallenberg 2002, Thm 6.3）。
-Mathlib 对应 `ProbabilityTheory.condDistrib` / 测度 disintegration。**证明待填 (`sorry`)。**
+Mathematical basis: `Θ` compact Polish ⇒ standard Borel ⇒ regular conditional distributions
+exist (Kallenberg 2002, Thm 6.3), matching Mathlib's `ProbabilityTheory.condDistrib`. The proof
+is not yet filled in (`sorry`).
 -/
 
 open MeasureTheory
@@ -27,8 +26,9 @@ variable {Ω : Type*} {m : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMe
 variable {ι : Type*} [Preorder ι] (ℱ : Filtration ι m)
 variable {Θ : Type*} [MeasurableSpace Θ] [StandardBorelSpace Θ] (θ : Ω → Θ)
 
-/-- **Lemma 1, 存在性 + 核性质**。对每个时间 `t`，存在 `ℱ t`-可测的后验核 `S`，
-满足对每个有界可测 `φ`，`ω ↦ ∫ φ dS(ω)` 与 `E[φ(θ)|ℱ t]` a.s. 相等。 -/
+/-- Existence of the posterior kernel (part of Lemma 1). For each time `t` there is an
+`ℱ t`-measurable kernel `S` such that, for every bounded measurable `φ`, the map
+`ω ↦ ∫ φ dS(ω)` equals `E[φ(θ) | ℱ t]` almost surely. Proof not yet filled in. -/
 theorem kernel_exists (hθ : Measurable θ) (t : ι) :
     ∃ S : Ω → Measure Θ,
       (∀ ω, IsProbabilityMeasure (S ω)) ∧

@@ -4,5 +4,7 @@
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{corollary}[theorem]{Corollary}
 
+% Definition 用独立计数器，使主命题成为 "Lemma 1"（与论文一致），
+% 而非因 Environment 定义占用计数器而变成 "Lemma 2"。
 \theoremstyle{definition}
-\newtheorem{definition}[theorem]{Definition}
+\newtheorem{definition}{Definition}

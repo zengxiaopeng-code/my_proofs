@@ -11,9 +11,14 @@
 This chapter formalizes \textbf{Lemma 1 (Posterior process)} of the paper (label
 \texttt{lem:posterior-martingale}). \textbf{The verbatim statement and proof are in
 \texttt{docs/paper-lemma1.md}}; this chapter decomposes that proof, following the paper's own
-four steps, into separate nodes. Each node links to its Lean declaration and is marked green
-exactly when it is fully verified by the Lean kernel (no \texttt{sorry}). Click any node to
-check what it states and whether Lean has actually proved it.
+four steps, into separate nodes.
+
+\noindent\textbf{How to read this page.} Hover over a statement's title bar to reveal a row of
+small icons, then click the \textsf{L$\exists\forall$N} icon to open the Lean declaration that
+formalizes it (it takes you to the API documentation showing the exact Lean statement). A
+statement is coloured green exactly when the Lean kernel has fully verified it (no
+\texttt{sorry}). \textbf{Lemma 1} below is the paper's full statement; the lemmas after it
+(Lemma~2, 3, \dots) are the steps of its proof, each linked to its own Lean declaration.
 
 \begin{definition}[Environment]\label{def:setup}
     Discrete time $t\in\mathbb T=\{0,1,2,\dots\}$. A Borel probability space
@@ -27,6 +32,8 @@ check what it states and whether Lean has actually proved it.
 % Main statement (verbatim); its proof is decomposed into the four step-nodes below.
 %======================================================================
 \begin{lemma}[Posterior process]\label{lem:posterior-martingale}
+    \lean{PosteriorProcess.kernel_exists, PosteriorProcess.factorization_posterior,
+      PosteriorProcess.testfun_martingale}
     \uses{def:setup}
     For each $t\in\mathbb T$, there exists an $\mathcal F_t$-measurable posterior kernel
     $S_t:\Omega\to\Delta(\Theta)$ such that, for every bounded Borel function

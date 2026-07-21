@@ -1,0 +1,19 @@
+% PDF 版本主文件（需 xelatex/lualatex + latexmk；没装 LaTeX 可先只用 web）
+\documentclass[a4paper]{report}
+
+\usepackage{geometry}
+\usepackage{expl3}
+\usepackage{amssymb, amsthm, mathtools}
+\usepackage[unicode,colorlinks=true,linkcolor=blue,urlcolor=magenta, citecolor=blue]{hyperref}
+\usepackage[warnings-off={mathtools-colon,mathtools-overbracket}]{unicode-math}
+
+\input{macros/common}
+\input{macros/print}
+
+\title{Posterior Process --- Formalization Blueprint}
+\author{}
+
+\begin{document}
+\maketitle
+\input{content}
+\end{document}

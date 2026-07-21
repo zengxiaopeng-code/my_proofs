@@ -52,7 +52,7 @@ $$\int_\Theta\varphi(\theta')\,S_t(\omega)(d\theta') =\mathbb E[\varphi(\theta)\
 Fix any bounded Borel $\varphi:\Theta\to\mathbb R$ and define $F:\Delta(\Theta)\to\mathbb R$ by
 $F(\mu):=\int_\Theta\varphi(\theta')\,\mu(d\theta')$. By the functional monotone class theorem,
 $F$ is Borel measurable on $\Delta(\Theta)$: it holds for continuous $\varphi$ by the definition
-of the weak topology, and extends to all bounded Borel $\varphi$ by dominated convergence.[^fn]
+of the weak topology, and extends to all bounded Borel $\varphi$ by dominated convergence.
 Therefore $\omega\mapsto F(S_t(\omega))$ is $\sigma(S_t)$-measurable. By
 (eq:kernel-property), $\mathbb E[\varphi(\theta)\mid\mathcal F_t](\omega)=F(S_t(\omega))$ a.s., so
 $\mathbb E[\varphi(\theta)\mid\mathcal F_t]$ is $\sigma(S_t)$-measurable. For any
@@ -64,11 +64,6 @@ Since $F(S_t)$ is $\sigma(S_t)$-measurable, uniqueness of conditional expectatio
 $\mathbb E[\varphi(\theta)\mid\mathcal F_t]=\mathbb E[\varphi(\theta)\mid S_t]$ a.s. As $\varphi$
 was arbitrary, conditioning on $S_t$ and conditioning on $\mathcal F_t$ yield the same
 conditional distribution of $\theta$.
-
-[^fn]: Explicitly: every bounded Borel function is the pointwise limit of a uniformly bounded
-sequence of continuous functions (by Lusin's theorem and dominated convergence), so
-$F(\mu)=\lim_n\int\varphi_n\,d\mu$ is a pointwise limit of Borel measurable functions, hence
-Borel measurable.
 
 ### Part (ii): Induction by $Z_t$.
 

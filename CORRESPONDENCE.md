@@ -31,4 +31,3 @@ lake env lean MyProofs/PosteriorProcess/Audit.lean # 看 #print axioms：无 sor
 | (ii) Δ(Θ) 标准 Borel | `deltaTheta_standardBorel` | 🔵 库缺口 sorry |
 | (ii) 完整版 | `factorization_posterior` | 🔵 依赖上者 |
 | (iii) 鞅 | `testfun_martingale` | ✅ 已证 |
-| (i) 脚注反证（审查） | `indicatorRat_not_pointwiseLimit_continuous` | ✅ 已证 |

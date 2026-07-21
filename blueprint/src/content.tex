@@ -78,15 +78,12 @@ check what it states and whether Lean has actually proved it.
     $\mathcal F_t$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:footnote}
     For bounded Borel $\varphi$, the map $F(\mu):=\int\varphi\,d\mu$ is Borel measurable on
     $\Delta(\Theta)$ by the functional monotone class theorem (it holds for continuous $\varphi$
     by the definition of the weak topology, and extends to bounded Borel $\varphi$ by dominated
     convergence). Hence $\mathbb E[\varphi(\theta)\mid\mathcal F_t]=F(S_t)$ is
     $\sigma(S_t)$-measurable, and uniqueness of conditional expectation gives the equality of the
     two conditional expectations. \emph{Lean status:} not yet formalized (no declaration).
-    \emph{See also} Lemma~\ref{lem:footnote}: an erroneous footnote in the paper's argument here
-    is refuted in Lean.
 \end{proof}
 
 %======================================================================
@@ -143,25 +140,4 @@ check what it states and whether Lean has actually proved it.
     By the tower property, $\mathbb E[\int\varphi\,dS_t\mid\mathcal F_s]
     =\mathbb E[\varphi(\theta)\mid\mathcal F_s]=\int\varphi\,dS_s$ for $s\le t$. Mathlib's
     \texttt{martingale\_condExp}. Verified by the Lean kernel, no \texttt{sorry}.
-\end{proof}
-
-%======================================================================
-% Review: the erroneous Part (i) footnote -- refuted in Lean
-%======================================================================
-\begin{lemma}[Refutation of the Part (i) footnote]\label{lem:footnote}
-    \lean{PosteriorProcess.indicatorRat_not_pointwiseLimit_continuous}\leanok
-    The indicator $\mathbf 1_{\mathbb Q}$ (a bounded Borel function) is not the pointwise limit
-    of any sequence of continuous functions. Consequently the paper's Part~(i) footnote --
-    ``every bounded Borel function is the pointwise limit of a uniformly bounded sequence of
-    continuous functions'' -- is false.
-\end{lemma}
-\begin{proof}\leanok
-    A self-contained Baire category argument: if $g_n\to\mathbf 1_{\mathbb Q}$ pointwise, then
-    $\mathbb R$ is covered by the countably many closed sets
-    $A_N=\{x:\forall n\ge N,\ \tfrac12\le g_n(x)\}$ and
-    $B_N=\{x:\forall n\ge N,\ g_n(x)\le\tfrac12\}$; by Baire one of them has nonempty interior,
-    whose irrational (resp.\ rational) points contradict the limit value. Verified by the Lean
-    kernel, no \texttt{sorry}. \emph{Note:} this does not affect the conclusion of~(i) -- the
-    main-text functional monotone class argument is itself correct (Lemma~\ref{lem:sufficiency});
-    the footnote is merely a flawed and unnecessary aside, and should be deleted from the paper.
 \end{proof}

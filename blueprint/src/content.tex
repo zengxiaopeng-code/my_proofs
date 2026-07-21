@@ -37,22 +37,83 @@
 
     \textbf{(iii)} $\{S_t\}_{t\in\mathbb T}$ is a bounded $(\mathcal F_t)$-martingale.
 \end{lemma}
+% 证明正文 = 论文逐字原文（英文，未改）。权威档案见 docs/paper-lemma1.md；
+% 每部分对应的 Lean 声明与验证状态，另见证明后的“形式化状态”段与 CORRESPONDENCE.md。
 \begin{proof}
     \uses{def:setup}
-    形式化状态逐部分标注（细节见 \texttt{CORRESPONDENCE.md}）：
+    \emph{Existence of the posterior kernel.}\quad
+    Since $\Theta$ is a compact Polish space, $\Delta(\Theta)$ equipped with the weak topology
+    is also a compact Polish space, hence a standard Borel space. The map $\theta:\Omega\to\Theta$
+    is $\mathcal F$-measurable and $\mathcal F_t\subseteq\mathcal F$ is a sub-$\sigma$-algebra. By
+    the standard theorem on regular conditional distributions for Polish-space-valued random
+    variables (Kallenberg 2002, Theorem~6.3), there exists a Markov kernel
+    $S_t:\Omega\times\mathcal B(\Theta)\to[0,1]$ such that \textbf{(a)}
+    $\omega\mapsto S_t(\omega)(B)$ is $\mathcal F_t$-measurable for every $B\in\mathcal B(\Theta)$,
+    and \textbf{(b)} $S_t(\omega)(\cdot)=\mathbb P(\theta\in\cdot\mid\mathcal F_t)(\omega)$
+    $\mathbb P$-a.s. Equivalently, for every bounded Borel $\varphi:\Theta\to\mathbb R$,
+    \[
+      \int_\Theta\varphi(\theta')\,S_t(\omega)(d\theta')
+        =\mathbb E[\varphi(\theta)\mid\mathcal F_t](\omega)\qquad\text{a.s.}
+        \qquad(\star)
+    \]
 
-    \emph{存在性}：$\Theta$ 标准 Borel，由正则条件分布（Kallenberg Thm 6.3）即得。
-    Lean：\texttt{kernel\_exists}（🔵 待证）。
+    \emph{Part (i): Sufficiency.}\quad
+    Fix any bounded Borel $\varphi:\Theta\to\mathbb R$ and define $F:\Delta(\Theta)\to\mathbb R$
+    by $F(\mu):=\int_\Theta\varphi(\theta')\,\mu(d\theta')$. By the functional monotone class
+    theorem, $F$ is Borel measurable on $\Delta(\Theta)$: it holds for continuous $\varphi$ by
+    the definition of the weak topology, and extends to all bounded Borel $\varphi$ by dominated
+    convergence.\footnote{Explicitly: every bounded Borel function is the pointwise limit of a
+    uniformly bounded sequence of continuous functions (by Lusin's theorem and dominated
+    convergence), so $F(\mu)=\lim_n\int\varphi_n\,d\mu$ is a pointwise limit of Borel measurable
+    functions, hence Borel measurable.} Therefore $\omega\mapsto F(S_t(\omega))$ is
+    $\sigma(S_t)$-measurable. By $(\star)$, $\mathbb E[\varphi(\theta)\mid\mathcal F_t](\omega)
+    =F(S_t(\omega))$ a.s., so $\mathbb E[\varphi(\theta)\mid\mathcal F_t]$ is
+    $\sigma(S_t)$-measurable. For any $B\in\sigma(S_t)\subseteq\mathcal F_t$,
+    \[
+      \mathbb E\bigl[\varphi(\theta)\mathbf 1_B\bigr]
+        =\mathbb E\bigl[\mathbb E[\varphi(\theta)\mid\mathcal F_t]\mathbf 1_B\bigr]
+        =\mathbb E\bigl[F(S_t)\mathbf 1_B\bigr].
+    \]
+    Since $F(S_t)$ is $\sigma(S_t)$-measurable, uniqueness of conditional expectation gives
+    $\mathbb E[\varphi(\theta)\mid\mathcal F_t]=\mathbb E[\varphi(\theta)\mid S_t]$ a.s. As
+    $\varphi$ was arbitrary, conditioning on $S_t$ and conditioning on $\mathcal F_t$ yield the
+    same conditional distribution of $\theta$.
 
-    \emph{(i) 充分性}：$F(\mu):=\int\varphi\,d\mu$ 在 $\Delta(\Theta)$ 上 Borel 可测（泛函单调类
-    定理），故 $\mathbb E[\varphi(\theta)\mid\mathcal F_t]=F(S_t)$ 是 $\sigma(S_t)$-可测，由条件期望
-    唯一性得两条件期望相等。（尚未形式化。\emph{注：论文原脚注"有界 Borel=连续函数逐点极限"
-    不成立，应删除；正文单调类论证正确。}）
+    \emph{Part (ii): Induction by $Z_t$.}\quad
+    Since $\mathcal F_t=\sigma(Z_t)$ and $S_t$ is $\sigma(Z_t)$-measurable with values in the
+    standard Borel space $\Delta(\Theta)$, the Doob--Dynkin lemma (Kallenberg 2002, Lemma~1.14)
+    yields a Borel measurable function $f_t:E_t\to\Delta(\Theta)$ such that
+    $S_t(\omega)=f_t(Z_t(\omega))$ $\mathbb P$-a.s. Hence $Z_t$ induces the posterior $S_t$
+    through the measurable map $f_t$.
 
-    \emph{(ii) 因子分解}：抽象 Doob--Dynkin 已证（Lean：\texttt{factorization} ✅）；完整版
-    \texttt{factorization\_posterior} 依赖"$\Delta(\Theta)$ 标准 Borel"这一库缺口（🔵）。
-
-    \emph{(iii) 鞅}：由塔性质，$\mathbb E[\int\varphi\,dS_t\mid\mathcal F_s]
-    =\mathbb E[\varphi(\theta)\mid\mathcal F_s]=\int\varphi\,dS_s$。
-    Lean：\texttt{testfun\_martingale} ✅（已证，无 sorry）。
+    \emph{Part (iii): Martingale property.}\quad
+    Fix $s\le t$ and any bounded Borel $\varphi:\Theta\to\mathbb R$. Then
+    \[
+      \mathbb E\!\left[\int_\Theta\varphi(\theta')\,S_t(\omega)(d\theta')\,\Big|\,\mathcal F_s\right]
+        =\mathbb E\bigl[\mathbb E[\varphi(\theta)\mid\mathcal F_t]\mid\mathcal F_s\bigr]
+        =\mathbb E[\varphi(\theta)\mid\mathcal F_s]
+        =\int_\Theta\varphi(\theta')\,S_s(\omega)(d\theta')\quad\text{a.s.},
+    \]
+    where the first and last equalities use $(\star)$, and the middle equality uses the tower
+    property of conditional expectations together with $\mathcal F_s\subseteq\mathcal F_t$. Since
+    $\varphi$ was arbitrary, $\mathbb E[S_t\mid\mathcal F_s]=S_s$ a.s. in $\Delta(\Theta)$.
+    Boundedness holds because $S_t(\omega)$ is a probability measure: for every bounded $\varphi$,
+    $\bigl|\int_\Theta\varphi\,dS_t\bigr|\le\|\varphi\|_\infty<\infty$.
 \end{proof}
+
+\bigskip
+\noindent\textbf{形式化状态}（与上述证明分开陈述，避免干扰阅读；逐符号对照见
+\texttt{CORRESPONDENCE.md}）。各部分对应的 Lean 声明及其内核验证情况：
+
+\begin{itemize}
+  \item \emph{存在性}：\texttt{kernel\_exists}——命题已按论文陈述形式化，证明待填。
+  \item \emph{(i) 充分性}：尚未形式化。
+  \item \emph{(ii) 因子分解}：\texttt{factorization\_posterior}；其抽象 Doob--Dynkin 步骤
+    \texttt{factorization} 已由 Lean 内核完整验证，整体仍依赖“$\Delta(\Theta)$ 为标准 Borel
+    空间”这一当前 Mathlib 库缺口。
+  \item \emph{(iii) 鞅}：\texttt{testfun\_martingale}——已由 Lean 内核完整验证（无 \texttt{sorry}）。
+\end{itemize}
+
+\noindent\emph{人工审查笔记（与 Lean 验证无关）}：论文 (i) 的脚注断言“有界 Borel 函数是一致有界
+连续函数序列的逐点极限”。该断言不成立（Baire 第一类；$\mathbf 1_{\mathbb Q}$ 为反例），建议在论文中
+删除此脚注——正文的泛函单调类论证本身正确，(i) 的结论不受影响。

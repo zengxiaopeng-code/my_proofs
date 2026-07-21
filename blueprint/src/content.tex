@@ -1,26 +1,30 @@
-% Blueprint 内容：分解式节点（行内标准）。
-%   \lean{声明}  链接到具体 Lean 声明（checkdecls 会校验存在）。
-%   \leanok      仅用于「已被 Lean 内核完整证明、无 sorry」的节点 → 依赖图中显示为绿。
-%                含 sorry / 库缺口的节点只给 \lean 链接、不给 \leanok，并在正文明写状态。
-%   \uses{...}   标依赖，生成依赖图的边。
-% 命题与证明的逐字原文见 docs/paper-lemma1.md（唯一权威来源）；本章为其形式化分解。
+% Blueprint content: decomposed nodes (community-standard style).
+%   \lean{decl}  links to a specific Lean declaration (verified to exist by checkdecls).
+%   \leanok      used ONLY for nodes fully proved by the Lean kernel (no sorry) -> green in the graph.
+%                Nodes with sorry / a library gap get only \lean (no \leanok) and state their status in prose.
+%   \uses{...}   dependencies (edges of the dependency graph).
+% The verbatim statement and proof are in docs/paper-lemma1.md (single source of truth);
+% this chapter is its formalization decomposition. Language: English, matching the paper.
 
 \chapter{Lemma 1: Posterior process}
 
-本章形式化论文的 \textbf{Lemma 1 (Posterior process)}（论文标签
-\texttt{lem:posterior-martingale}）。\textbf{命题与证明的逐字原文见 \texttt{docs/paper-lemma1.md}}；
-本章把该证明**按论文自身的四步分解成独立节点**，每个节点链接到它对应的 Lean 声明，
-并按是否被 Lean 内核完整证明标注状态（绿色 = 无 \texttt{sorry}，已背书）。读者可点开任一节点核对它证的是什么、以及 Lean 有没有真的证完。
+This chapter formalizes \textbf{Lemma 1 (Posterior process)} of the paper (label
+\texttt{lem:posterior-martingale}). \textbf{The verbatim statement and proof are in
+\texttt{docs/paper-lemma1.md}}; this chapter decomposes that proof, following the paper's own
+four steps, into separate nodes. Each node links to its Lean declaration and is marked green
+exactly when it is fully verified by the Lean kernel (no \texttt{sorry}). Click any node to
+check what it states and whether Lean has actually proved it.
 
 \begin{definition}[Environment]\label{def:setup}
-    离散时间 $t\in\mathbb T=\{0,1,2,\dots\}$。Borel 概率空间 $(\Omega,\mathcal F,\mathbb P)$，
-    原始状态 $\theta:\Omega\to\Theta$，$\Theta$ 紧 Polish；$\Delta(\Theta)$ 为 $\Theta$ 上概率测度
-    （弱拓扑）。公开状态 $Z_t:\Omega\to E_t$（$E_t$ Polish），$\mathcal F_t=\sigma(Z_t)$ 为递增滤子，
-    $\mathcal F_0$ 平凡。
+    Discrete time $t\in\mathbb T=\{0,1,2,\dots\}$. A Borel probability space
+    $(\Omega,\mathcal F,\mathbb P)$; primitive state $\theta:\Omega\to\Theta$ with $\Theta$
+    compact Polish; $\Delta(\Theta)$ the space of Borel probability measures on $\Theta$ (weak
+    topology). Public state $Z_t:\Omega\to E_t$ ($E_t$ Polish), with $\mathcal F_t=\sigma(Z_t)$
+    an increasing filtration and $\mathcal F_0$ trivial.
 \end{definition}
 
 %======================================================================
-% 主命题（逐字原文），其证明拆为下面四个步骤节点。
+% Main statement (verbatim); its proof is decomposed into the four step-nodes below.
 %======================================================================
 \begin{lemma}[Posterior process]\label{lem:posterior-martingale}
     \uses{def:setup}
@@ -39,103 +43,125 @@
 \end{lemma}
 \begin{proof}
     \uses{lem:existence, lem:sufficiency, lem:factorization, lem:martingale}
-    命题是以下四步之合取：存在性与核性质（引理~\ref{lem:existence}）、充分性
-    （引理~\ref{lem:sufficiency}，即 (i)）、由 $Z_t$ 因子分解（引理~\ref{lem:factorization}，即 (ii)）、
-    鞅性质（引理~\ref{lem:martingale}，即 (iii)）。逐字证明见 \texttt{docs/paper-lemma1.md}。
+    The statement is the conjunction of the four steps below: existence and the kernel property
+    (Lemma~\ref{lem:existence}), sufficiency (Lemma~\ref{lem:sufficiency}, part~(i)),
+    factorization through $Z_t$ (Lemma~\ref{lem:factorization}, part~(ii)), and the martingale
+    property (Lemma~\ref{lem:martingale}, part~(iii)). The verbatim proof is in
+    \texttt{docs/paper-lemma1.md}.
 \end{proof}
 
 %======================================================================
-% 步骤 1：存在性 + 核性质
+% Step 1: existence + kernel property
 %======================================================================
 \begin{lemma}[Existence of the posterior kernel]\label{lem:existence}
     \lean{PosteriorProcess.kernel_exists}
     \uses{def:setup}
-    对每个 $t$，存在 $\mathcal F_t$-可测的 $S_t:\Omega\to\Delta(\Theta)$，使得对每个有界 Borel
-    $\varphi$，$\;\omega\mapsto\int_\Theta\varphi\,dS_t(\omega)$ 与
-    $\mathbb E[\varphi(\theta)\mid\mathcal F_t]$ 几乎处处相等。
+    For each $t$, there exists an $\mathcal F_t$-measurable $S_t:\Omega\to\Delta(\Theta)$ such
+    that, for every bounded Borel $\varphi$, the map
+    $\omega\mapsto\int_\Theta\varphi\,dS_t(\omega)$ equals
+    $\mathbb E[\varphi(\theta)\mid\mathcal F_t]$ almost surely.
 \end{lemma}
 \begin{proof}
-    $\Theta$ 紧 Polish $\Rightarrow$ 标准 Borel，由正则条件分布（Kallenberg 2002, Thm~6.3）即得。
-    \emph{Lean 状态}：声明为 \texttt{PosteriorProcess.kernel\_exists}，**证明尚含 \texttt{sorry}**（未背书）。
+    $\Theta$ compact Polish $\Rightarrow$ standard Borel; the claim follows from the existence
+    of regular conditional distributions (Kallenberg 2002, Thm~6.3).
+    \emph{Lean status:} declared as \texttt{PosteriorProcess.kernel\_exists}; the proof still
+    contains \texttt{sorry} (not yet verified).
 \end{proof}
 
 %======================================================================
-% 步骤 2：(i) 充分性
+% Step 2: (i) sufficiency
 %======================================================================
 \begin{lemma}[Part (i): Sufficiency]\label{lem:sufficiency}
     \uses{lem:existence}
-    在 $S_t$ 上取条件与在 $\mathcal F_t$ 上取条件给出 $\theta$ 相同的条件分布；即 $S_t$ 是
-    $\theta$ 关于 $\mathcal F_t$ 的充分统计量。
+    Conditioning on $S_t$ and conditioning on $\mathcal F_t$ yield the same conditional
+    distribution of $\theta$; that is, $S_t$ is a sufficient statistic for $\theta$ given
+    $\mathcal F_t$.
 \end{lemma}
 \begin{proof}
     \uses{lem:footnote}
-    对有界 Borel $\varphi$，$F(\mu):=\int\varphi\,d\mu$ 在 $\Delta(\Theta)$ 上 Borel 可测
-    （泛函单调类定理：对连续 $\varphi$ 由弱拓扑定义成立，再由控制收敛延拓到有界 Borel）。
-    故 $\mathbb E[\varphi(\theta)\mid\mathcal F_t]=F(S_t)$ 是 $\sigma(S_t)$-可测，由条件期望唯一性得两条件期望相等。
-    \emph{Lean 状态}：**尚未形式化**（无对应声明）。\emph{另见}引理~\ref{lem:footnote}：论文此处一条脚注的错误已被 Lean 反证。
+    For bounded Borel $\varphi$, the map $F(\mu):=\int\varphi\,d\mu$ is Borel measurable on
+    $\Delta(\Theta)$ by the functional monotone class theorem (it holds for continuous $\varphi$
+    by the definition of the weak topology, and extends to bounded Borel $\varphi$ by dominated
+    convergence). Hence $\mathbb E[\varphi(\theta)\mid\mathcal F_t]=F(S_t)$ is
+    $\sigma(S_t)$-measurable, and uniqueness of conditional expectation gives the equality of the
+    two conditional expectations. \emph{Lean status:} not yet formalized (no declaration).
+    \emph{See also} Lemma~\ref{lem:footnote}: an erroneous footnote in the paper's argument here
+    is refuted in Lean.
 \end{proof}
 
 %======================================================================
-% 步骤 3：(ii) Doob–Dynkin —— 抽象层（已证）+ 库缺口 + 完整版
+% Step 3: (ii) Doob-Dynkin -- abstract layer (proved) + library gap + full version
 %======================================================================
 \begin{lemma}[Abstract Doob--Dynkin factorization]\label{lem:doob-abstract}
     \lean{PosteriorProcess.factorization}\leanok
-    若 $S$ 关于 $\sigma(Z)$ 可测、取值于标准 Borel 空间，则存在 Borel 可测 $f$ 使得 $S=f\circ Z$。
+    If $S$ is $\sigma(Z)$-measurable and takes values in a standard Borel space, then
+    $S=f\circ Z$ for some Borel measurable $f$.
 \end{lemma}
 \begin{proof}\leanok
-    Mathlib 的 \texttt{Measurable.exists\_eq\_measurable\_comp}。**已由 Lean 内核完整证明（无 \texttt{sorry}）。**
+    Mathlib's \texttt{Measurable.exists\_eq\_measurable\_comp}. Verified by the Lean kernel, no
+    \texttt{sorry}.
 \end{proof}
 
 \begin{lemma}[$\Delta(\Theta)$ is standard Borel]\label{lem:deltaTheta-sb}
     \lean{PosteriorProcess.deltaTheta_standardBorel}
     \uses{def:setup}
-    $\Delta(\Theta)$（$\Theta$ 紧 Polish 上的概率测度，弱拓扑）是标准 Borel 空间。
+    $\Delta(\Theta)$ (Borel probability measures on the compact Polish space $\Theta$, weak
+    topology) is a standard Borel space.
 \end{lemma}
 \begin{proof}
-    数学上成立（紧 Polish 上概率测度空间仍是紧 Polish）。\emph{Lean 状态}：当前 Mathlib
-    缺 \texttt{ProbabilityMeasure} 的相应 \texttt{PolishSpace}/\texttt{StandardBorelSpace} 实例，
-    故声明 \texttt{PosteriorProcess.deltaTheta\_standardBorel} 的**证明含 \texttt{sorry}（库缺口）**。
+    True mathematically (the space of probability measures on a compact Polish space is again
+    compact Polish). \emph{Lean status:} Mathlib currently lacks the
+    \texttt{PolishSpace}/\texttt{StandardBorelSpace} instance for \texttt{ProbabilityMeasure}, so
+    \texttt{PosteriorProcess.deltaTheta\_standardBorel} contains \texttt{sorry} (library gap).
 \end{proof}
 
 \begin{lemma}[Part (ii): Induction by $Z_t$]\label{lem:factorization}
     \lean{PosteriorProcess.factorization_posterior}
     \uses{lem:existence, lem:doob-abstract, lem:deltaTheta-sb}
-    由于 $\mathcal F_t=\sigma(Z_t)$，存在 Borel 可测 $f_t:E_t\to\Delta(\Theta)$ 使得
-    $S_t=f_t(Z_t)$ a.s.；即公开历史 $Z_t$ 诱导后验 $S_t$。
+    Since $\mathcal F_t=\sigma(Z_t)$, there is a Borel measurable $f_t:E_t\to\Delta(\Theta)$ with
+    $S_t=f_t(Z_t)$ a.s.; the public history $Z_t$ induces the posterior $S_t$.
 \end{lemma}
 \begin{proof}
-    把抽象因子分解（引理~\ref{lem:doob-abstract}）用到 $\Delta(\Theta)$ 上，需后者为标准 Borel
-    （引理~\ref{lem:deltaTheta-sb}）。\emph{Lean 状态}：声明为 \texttt{factorization\_posterior}，
-    抽象步骤已证，但整体**经由引理~\ref{lem:deltaTheta-sb} 的库缺口仍含 \texttt{sorry}**。
+    Apply the abstract factorization (Lemma~\ref{lem:doob-abstract}) to $\Delta(\Theta)$, which
+    requires it to be standard Borel (Lemma~\ref{lem:deltaTheta-sb}). \emph{Lean status:}
+    declared as \texttt{factorization\_posterior}; the abstract step is verified, but the whole
+    still depends on the library gap of Lemma~\ref{lem:deltaTheta-sb} and thus contains
+    \texttt{sorry}.
 \end{proof}
 
 %======================================================================
-% 步骤 4：(iii) 鞅性质（已证）
+% Step 4: (iii) martingale property (proved)
 %======================================================================
 \begin{lemma}[Part (iii): Martingale property]\label{lem:martingale}
     \lean{PosteriorProcess.testfun_martingale}\leanok
     \uses{lem:existence}
-    对每个有界 Borel $\varphi$，实值过程 $t\mapsto\int_\Theta\varphi\,dS_t$ 是
-    $(\mathcal F_t)$-鞅；从而 $\{S_t\}$ 是有界测度值鞅。
+    For every bounded Borel $\varphi$, the real-valued process
+    $t\mapsto\int_\Theta\varphi\,dS_t$ is an $(\mathcal F_t)$-martingale; hence $\{S_t\}$ is a
+    bounded measure-valued martingale.
 \end{lemma}
 \begin{proof}\leanok
-    由塔性质：$\mathbb E[\int\varphi\,dS_t\mid\mathcal F_s]
-    =\mathbb E[\varphi(\theta)\mid\mathcal F_s]=\int\varphi\,dS_s$（$s\le t$）。Mathlib 的
-    \texttt{martingale\_condExp}。**已由 Lean 内核完整证明（无 \texttt{sorry}）。**
+    By the tower property, $\mathbb E[\int\varphi\,dS_t\mid\mathcal F_s]
+    =\mathbb E[\varphi(\theta)\mid\mathcal F_s]=\int\varphi\,dS_s$ for $s\le t$. Mathlib's
+    \texttt{martingale\_condExp}. Verified by the Lean kernel, no \texttt{sorry}.
 \end{proof}
 
 %======================================================================
-% 审查：论文 (i) 脚注的错误 —— 已由 Lean 反证
+% Review: the erroneous Part (i) footnote -- refuted in Lean
 %======================================================================
 \begin{lemma}[Refutation of the Part (i) footnote]\label{lem:footnote}
     \lean{PosteriorProcess.indicatorRat_not_pointwiseLimit_continuous}\leanok
-    有理数示性函数 $\mathbf 1_{\mathbb Q}$（有界 Borel）**不是**任何连续函数列的逐点极限。
-    因此论文 (i) 的脚注断言“有界 Borel 函数 $=$ 一致有界连续函数列的逐点极限”**不成立**。
+    The indicator $\mathbf 1_{\mathbb Q}$ (a bounded Borel function) is not the pointwise limit
+    of any sequence of continuous functions. Consequently the paper's Part~(i) footnote --
+    ``every bounded Borel function is the pointwise limit of a uniformly bounded sequence of
+    continuous functions'' -- is false.
 \end{lemma}
 \begin{proof}\leanok
-    自足的 Baire 纲反证：若 $g_n\to\mathbf 1_{\mathbb Q}$ 逐点，则 $\mathbb R$ 被可数个闭集
-    $A_N=\{x:\forall n\ge N,\ \tfrac12\le g_n(x)\}$、$B_N=\{x:\forall n\ge N,\ g_n(x)\le\tfrac12\}$ 覆盖；
-    由 Baire 纲某个含非空开集，其中的无理/有理点与极限值矛盾。**已由 Lean 内核完整证明（无 \texttt{sorry}）。**
-    \emph{注}：这不影响 (i) 的结论——正文的泛函单调类论证本身正确（见引理~\ref{lem:sufficiency}）；
-    该脚注只是一条方法有误且非必要的注解，建议在论文中删除。
+    A self-contained Baire category argument: if $g_n\to\mathbf 1_{\mathbb Q}$ pointwise, then
+    $\mathbb R$ is covered by the countably many closed sets
+    $A_N=\{x:\forall n\ge N,\ \tfrac12\le g_n(x)\}$ and
+    $B_N=\{x:\forall n\ge N,\ g_n(x)\le\tfrac12\}$; by Baire one of them has nonempty interior,
+    whose irrational (resp.\ rational) points contradict the limit value. Verified by the Lean
+    kernel, no \texttt{sorry}. \emph{Note:} this does not affect the conclusion of~(i) -- the
+    main-text functional monotone class argument is itself correct (Lemma~\ref{lem:sufficiency});
+    the footnote is merely a flawed and unnecessary aside, and should be deleted from the paper.
 \end{proof}

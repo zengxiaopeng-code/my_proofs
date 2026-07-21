@@ -1,2 +1,2 @@
 import MyProofs.Basic
-import MyProofs.Posterior
+import MyProofs.PosteriorProcess

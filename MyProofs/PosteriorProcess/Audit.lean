@@ -1,4 +1,4 @@
-import MyProofs.Posterior
+import MyProofs.PosteriorProcess
 
 /-!
 # 背书审计
@@ -13,10 +13,10 @@ import MyProofs.Posterior
 这就是"Lean 到底证没证"的机器可查判据——无法造假。
 -/
 
-open Posterior
+open PosteriorProcess
 
 -- ✅ 已证：应只依赖 propext / Classical.choice / Quot.sound
-#print axioms posterior_testfun_martingale
+#print axioms testfun_martingale
 
 -- 🔵 含 sorry：应出现 sorryAx，暴露"还没证"
-#print axioms exists_posterior_kernel
+#print axioms kernel_exists

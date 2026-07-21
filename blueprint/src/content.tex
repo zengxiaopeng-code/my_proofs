@@ -10,7 +10,7 @@
 \end{definition}
 
 \begin{lemma}[Posterior kernel: existence]\label{lem:existence}
-    \lean{Posterior.exists_posterior_kernel}
+    \lean{PosteriorProcess.kernel_exists}
     \uses{def:setup}
     对每个 $t$，存在 $\mathcal F_t$-可测的后验核 $S_t:\Omega\to\Delta(\Theta)$，
     使得对每个有界 Borel $\varphi$，
@@ -37,7 +37,7 @@
 \end{proof}
 
 \begin{lemma}[Part (ii): factorization]\label{lem:doobdynkin}
-    \lean{Posterior.posterior_factorization}
+    \lean{PosteriorProcess.factorization}
     \uses{lem:existence}
     存在 Borel 可测 $f_t$ 使 $S_t=f_t(Z_t)$ a.s.
 \end{lemma}
@@ -48,7 +48,7 @@
 \end{proof}
 
 \begin{lemma}[Part (iii): martingale]\label{lem:martingale}
-    \lean{Posterior.posterior_testfun_martingale}
+    \lean{PosteriorProcess.testfun_martingale}
     \uses{lem:existence}
     对每个有界 Borel $\varphi$，实值过程 $t\mapsto\int\varphi\,dS_t=\mathbb E[\varphi(\theta)\mid\mathcal F_t]$
     是 $(\mathcal F_t)$-鞅；故 $\{S_t\}$ 是有界测度值鞅。

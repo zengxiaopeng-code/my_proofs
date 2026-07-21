@@ -1,4 +1,4 @@
-import Mathlib
+import Mathlib.MeasureTheory.Measure.MeasureSpace
 
 /-!
 # Lemma 1 (Posterior process) · 共享设置

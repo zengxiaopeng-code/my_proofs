@@ -1,4 +1,6 @@
-import Mathlib
+import Mathlib.MeasureTheory.Function.FactorsThrough
+import Mathlib.MeasureTheory.Measure.ProbabilityMeasure
+import Mathlib.MeasureTheory.Constructions.Polish.Basic
 
 /-!
 # Lemma 1 (Posterior process) · Part (ii)：Doob–Dynkin 因子分解

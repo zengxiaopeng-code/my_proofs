@@ -1,4 +1,4 @@
-import Mathlib
+import Mathlib.Probability.Martingale.Basic
 
 /-!
 # Lemma 1 (Posterior process) · Part (iii)：鞅性质

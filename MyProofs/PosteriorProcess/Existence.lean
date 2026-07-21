@@ -1,4 +1,6 @@
-import Mathlib
+import Mathlib.Probability.Process.Filtration
+import Mathlib.MeasureTheory.Function.ConditionalExpectation.Basic
+import Mathlib.MeasureTheory.Constructions.Polish.Basic
 
 /-!
 # Lemma 1 (Posterior process) · 存在性 + 核性质 (eq:kernel-property)

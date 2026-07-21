@@ -3,12 +3,9 @@ import Mathlib.Probability.Martingale.Basic
 /-!
 # Lemma 1 (Posterior process) · Part (iii)：鞅性质
 
-## 论文原文陈述（Part (iii)，逐字）
-> Fix $s\le t$ and any bounded Borel $\varphi:\Theta\to\mathbb R$. Then
-> $\mathbb E[\int_\Theta\varphi\,dS_t \mid \mathcal F_s]
->   = \mathbb E[\varphi(\theta)\mid\mathcal F_s]
->   = \int_\Theta\varphi\,dS_s$ a.s.
-> Since $\varphi$ was arbitrary, $\mathbb E[S_t\mid\mathcal F_s]=S_s$ a.s. in $\Delta(\Theta)$.
+## 论文原文
+Lemma 1 的命题与证明（含本 Part (iii)）的**逐字原文见 `docs/paper-lemma1.md`**
+（唯一权威来源；此处不另行誊抄，以免漂移）。
 
 ## Lean 陈述 ↔ 论文，逐符号对照
 | 论文                                   | Lean 里对应的部分                          |

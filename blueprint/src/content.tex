@@ -1,62 +1,58 @@
-% Blueprint 内容文件：Lemma "Posterior process"
-% 每个节点用 \lean{...} 链接到 Lean 声明，\uses{...} 标依赖，
-% 证明里的 \leanok 表示"该节点已被 Lean 背书"。
-% leanblueprint 会据此生成依赖图：绿色 = \leanok，蓝色 = 已陈述未证，白色 = 待陈述。
+% Blueprint 内容：镜像论文结构（节点 = 论文的定义/引理/命题，一一对应）。
+% \lean{...} 链接 Lean 声明，\uses{...} 标依赖，\leanok 表示已被 Lean 背书。
+% 逐部分的 Lean 进度与逐符号对照见 CORRESPONDENCE.md。
 
-\begin{definition}[Setup]\label{def:setup}
-    概率空间 $(\Omega,\mathcal F,\mathbb P)$，紧 Polish（故标准 Borel）状态空间
-    $\Theta$，滤子 $(\mathcal F_t)_{t\in\mathbb T}$ 满足 $\mathcal F_t=\sigma(Z_t)$，
-    随机变量 $\theta:\Omega\to\Theta$，公开历史 $Z_t$。
+\chapter{Lemma 1: Posterior process}
+
+本章形式化论文的 \textbf{Lemma 1 (Posterior process)}（论文标签
+\texttt{lem:posterior-martingale}）。节点与论文一一对应；读者可直接按标题对回原文。
+
+\begin{definition}[Environment]\label{def:setup}
+    离散时间 $t\in\mathbb T=\{0,1,2,\dots\}$。Borel 概率空间 $(\Omega,\mathcal F,\mathbb P)$，
+    原始状态 $\theta:\Omega\to\Theta$，$\Theta$ 紧 Polish；$\Delta(\Theta)$ 为 $\Theta$ 上概率测度
+    （弱拓扑）。公开状态 $Z_t:\Omega\to E_t$（$E_t$ Polish），$\mathcal F_t=\sigma(Z_t)$ 为递增滤子，
+    $\mathcal F_0$ 平凡。
 \end{definition}
 
-\begin{lemma}[Posterior kernel: existence]\label{lem:existence}
-    \lean{PosteriorProcess.kernel_exists}
+\begin{lemma}[Posterior process]\label{lem:posterior-martingale}
+    \lean{PosteriorProcess.kernel_exists, PosteriorProcess.factorization_posterior,
+      PosteriorProcess.testfun_martingale}
     \uses{def:setup}
-    对每个 $t$，存在 $\mathcal F_t$-可测的后验核 $S_t:\Omega\to\Delta(\Theta)$，
-    使得对每个有界 Borel $\varphi$，
-    $\int_\Theta\varphi\,dS_t=\mathbb E[\varphi(\theta)\mid\mathcal F_t]$ a.s.
+    For each $t\in\mathbb T$, there exists an $\mathcal F_t$-measurable posterior kernel
+    $S_t:\Omega\to\Delta(\Theta)$ such that, for every bounded Borel function
+    $\varphi:\Theta\to\mathbb R$,
+    \[
+      \int_\Theta \varphi(\theta')\,S_t(\omega)(d\theta')
+        = \mathbb E[\varphi(\theta)\mid\mathcal F_t](\omega)\qquad\text{a.s.}
+    \]
+    In particular:
+
+    \textbf{(i)} $S_t$ is a sufficient statistic for $\theta$ given $\mathcal F_t$:
+    conditioning on $S_t$ and conditioning on $\mathcal F_t$ yield the same conditional
+    distribution of $\theta$.
+
+    \textbf{(ii)} Since $\mathcal F_t = \sigma(Z_t)$, the Doob--Dynkin lemma implies that
+    $S_t = f_t(Z_t)$ for some Borel measurable function $f_t$; that is, the public history
+    $Z_t$ induces the posterior $S_t$.
+
+    \textbf{(iii)} $\{S_t\}_{t\in\mathbb T}$ is a bounded $(\mathcal F_t)$-martingale.
 \end{lemma}
 \begin{proof}
     \uses{def:setup}
-    $\Theta$ 标准 Borel，由正则条件分布定理（Kallenberg Thm 6.3）即得。
-    % \leanok  <- 证完 Lean 后取消注释
-\end{proof}
+    形式化状态逐部分标注（细节见 \texttt{CORRESPONDENCE.md}）：
 
-\begin{lemma}[Part (i): sufficiency]\label{lem:sufficiency}
-    \uses{lem:existence}
-    $S_t$ 是 $\theta$（给定 $\mathcal F_t$）的充分统计量：对 $S_t$ 取条件与对
-    $\mathcal F_t$ 取条件给出 $\theta$ 相同的条件分布。
-\end{lemma}
-\begin{proof}
-    \uses{lem:existence}
-    $F(\mu):=\int\varphi\,d\mu$ 在 $\Delta(\Theta)$ 上 Borel 可测（泛函单调类定理）。
-    于是 $\mathbb E[\varphi(\theta)\mid\mathcal F_t]=F(S_t)$ 是 $\sigma(S_t)$-可测；
-    再由条件期望唯一性得两条件期望相等。
-    \emph{注：论文原脚注"有界 Borel = 连续函数逐点极限"不成立（Baire class），
-    应删除，单调类论证已足够。}
-\end{proof}
+    \emph{存在性}：$\Theta$ 标准 Borel，由正则条件分布（Kallenberg Thm 6.3）即得。
+    Lean：\texttt{kernel\_exists}（🔵 待证）。
 
-\begin{lemma}[Part (ii): factorization]\label{lem:doobdynkin}
-    \lean{PosteriorProcess.factorization}
-    \uses{lem:existence}
-    存在 Borel 可测 $f_t$ 使 $S_t=f_t(Z_t)$ a.s.
-\end{lemma}
-\begin{proof}
-    \uses{lem:existence}
-    $S_t$ 是 $\sigma(Z_t)$-可测、取值标准 Borel 空间 $\Delta(\Theta)$，
-    Doob--Dynkin 引理即得。
-\end{proof}
+    \emph{(i) 充分性}：$F(\mu):=\int\varphi\,d\mu$ 在 $\Delta(\Theta)$ 上 Borel 可测（泛函单调类
+    定理），故 $\mathbb E[\varphi(\theta)\mid\mathcal F_t]=F(S_t)$ 是 $\sigma(S_t)$-可测，由条件期望
+    唯一性得两条件期望相等。（尚未形式化。\emph{注：论文原脚注"有界 Borel=连续函数逐点极限"
+    不成立，应删除；正文单调类论证正确。}）
 
-\begin{lemma}[Part (iii): martingale]\label{lem:martingale}
-    \lean{PosteriorProcess.testfun_martingale}
-    \uses{lem:existence}
-    对每个有界 Borel $\varphi$，实值过程 $t\mapsto\int\varphi\,dS_t=\mathbb E[\varphi(\theta)\mid\mathcal F_t]$
-    是 $(\mathcal F_t)$-鞅；故 $\{S_t\}$ 是有界测度值鞅。
-\end{lemma}
-\begin{proof}
-    \leanok
-    \uses{lem:existence}
-    由塔性质：$\mathbb E[\,\mathbb E[\varphi(\theta)\mid\mathcal F_t]\mid\mathcal F_s]
-    =\mathbb E[\varphi(\theta)\mid\mathcal F_s]$。在 Lean 中即
-    \texttt{martingale\_condExp}。
+    \emph{(ii) 因子分解}：抽象 Doob--Dynkin 已证（Lean：\texttt{factorization} ✅）；完整版
+    \texttt{factorization\_posterior} 依赖"$\Delta(\Theta)$ 标准 Borel"这一库缺口（🔵）。
+
+    \emph{(iii) 鞅}：由塔性质，$\mathbb E[\int\varphi\,dS_t\mid\mathcal F_s]
+    =\mathbb E[\varphi(\theta)\mid\mathcal F_s]=\int\varphi\,dS_s$。
+    Lean：\texttt{testfun\_martingale} ✅（已证，无 sorry）。
 \end{proof}

@@ -3,9 +3,8 @@ import MyProofs.PosteriorProcess.Existence
 /-!
 # Lemma 1 (Posterior process) · Part (i)：充分统计量
 
-## 论文原文陈述
-> $S_t$ is a sufficient statistic for $\theta$ given $\mathcal F_t$: conditioning on $S_t$
-> and conditioning on $\mathcal F_t$ yield the same conditional distribution of $\theta$.
+## 论文原文
+Lemma 1 的命题与证明（含本 Part (i)）的**逐字原文见 `docs/paper-lemma1.md`**（唯一权威来源）。
 
 ## 计划的 Lean 陈述（待存在性节点精化后填入）
 对给定后验核 `S`，∀ 有界可测 `φ`：

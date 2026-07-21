@@ -5,12 +5,8 @@ import Mathlib.MeasureTheory.Constructions.Polish.Basic
 /-!
 # Lemma 1 (Posterior process) · 存在性 + 核性质 (eq:kernel-property)
 
-## 论文原文陈述
-> By the standard theorem on regular conditional distributions ... there exists a
-> Markov kernel $S_t$ such that (a) $\omega\mapsto S_t(\omega)(B)$ is
-> $\mathcal F_t$-measurable, and (b) $S_t(\omega)(\cdot)=\mathbb P(\theta\in\cdot\mid\mathcal F_t)$.
-> Equivalently, for every bounded Borel $\varphi$,
-> $\int_\Theta\varphi\,dS_t=\mathbb E[\varphi(\theta)\mid\mathcal F_t]$ a.s. (eq:kernel-property)
+## 论文原文
+Lemma 1 的命题与证明（含存在性部分）的**逐字原文见 `docs/paper-lemma1.md`**（唯一权威来源）。
 
 ## Lean 陈述 ↔ 论文
 | 论文                              | Lean                                            |

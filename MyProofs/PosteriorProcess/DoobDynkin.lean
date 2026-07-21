@@ -5,10 +5,8 @@ import Mathlib.MeasureTheory.Constructions.Polish.Basic
 /-!
 # Lemma 1 (Posterior process) · Part (ii)：Doob–Dynkin 因子分解
 
-## 论文原文陈述
-> Since $\mathcal F_t=\sigma(Z_t)$ and $S_t$ is $\sigma(Z_t)$-measurable with values in the
-> standard Borel space $\Delta(\Theta)$, the Doob–Dynkin lemma yields a Borel measurable
-> $f_t:E_t\to\Delta(\Theta)$ such that $S_t(\omega)=f_t(Z_t(\omega))$ a.s.
+## 论文原文
+Lemma 1 的命题与证明（含本 Part (ii)）的**逐字原文见 `docs/paper-lemma1.md`**（唯一权威来源）。
 
 ## 形式化揭示的结构：论文这一句打包了两个独立事实
 1. **Doob–Dynkin 本身**（`factorization`）：σ(Z)-可测 + 陪域标准 Borel ⇒ 因子分解。

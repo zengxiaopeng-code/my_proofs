@@ -1,0 +1,142 @@
+% Blueprint chapter: the Model (§2), decomposed to field level for human paper<->Lean cross-check.
+%   Same node conventions as content.tex:
+%   \lean{decl} links to a Lean declaration (existence verified by checkdecls);
+%   \leanok marks nodes the kernel has fully checked (green); \uses draws dependency edges.
+% Verbatim paper text lives in docs/paper-model.md (single source of truth); this chapter is its
+% formalization decomposition. Each node states the paper origin and a faithfulness tag:
+%   [faithful]   the Lean statement is the paper's, transcribed;
+%   [weakening]  the Lean hypothesis is *weaker* than the paper (safe: does not over-assume);
+%   [encoding]   a modelling choice (e.g. Option ℕ), whose transparency is a separate green node.
+
+\chapter{Model (\S2): the dynamic mechanism game}
+
+This chapter formalizes the paper's \textbf{model} (\S2): the belief space, the allocation date,
+and the reduced-form continuation/truncation values with the single-shot stopping recursion.
+\textbf{The verbatim paper text is in \texttt{docs/paper-model.md}}; this chapter decomposes it to
+\emph{field level} so each Lean field can be checked against one clause of the paper.
+
+\noindent\textbf{How to read this page.} Hover a statement's title bar and click the
+\textsf{L$\exists\forall$N} icon to open the exact Lean declaration. A node is green exactly when
+the Lean kernel has checked it. Following the paper's own choice (Assumption~2, analytic
+equilibrium), the dynamic game is an \textbf{abstract axiomatization}: equilibrium continuation
+values are carried as data and the game-theoretic assumptions are hypotheses. So most of \S2 is
+\emph{definitions}, which the kernel cannot vet for faithfulness on its own. The bracketed tag on
+each node ([faithful]/[weakening]/[encoding]) says what to check; the
+\textbf{Faithfulness audit} nodes at the end turn as much of that as possible into green,
+kernel-checked facts (a consistency witness and transparency lemmas), mirroring
+\texttt{Meta/ModelFaithfulness.lean}.
+
+%======================================================================
+% §2.1 Belief space and allocation date
+%======================================================================
+\begin{definition}[Belief space $\Delta(\Theta)$]\label{def:belief}
+    \lean{DMC.Belief}\leanok
+    \uses{def:setup}
+    The belief space $\Delta(\Theta)$ is the set of Borel probability measures on the compact
+    Polish state space $\Theta$, with the weak topology. In Lean, \texttt{Belief}~$\Theta$ is
+    \texttt{ProbabilityMeasure}~$\Theta$. \emph{[faithful]} As established in
+    Lemma~\ref{lem:deltaTheta-sb}, it is a compact standard Borel space.
+\end{definition}
+
+\begin{definition}[Allocation date $\tau$]\label{def:allocdate}
+    \lean{DMC.AllocDate}\leanok
+    The allocation date is $\tau\in\{1,2,\dots\}\cup\{\emptyset\}$, where $\emptyset$ means ``no
+    sale ever occurs''. \emph{[encoding]} In Lean it is \texttt{Option}~$\mathbb N$, with
+    \texttt{none}$=\emptyset$. Faithfulness of this encoding is Lemma~\ref{lem:allocdate-faithful}.
+\end{definition}
+
+\begin{lemma}[$\emptyset$ is a genuine ``never''; dates are preserved]\label{lem:allocdate-faithful}
+    \lean{DMC.allocDate_never_ne_date, DMC.allocDate_date_injective}\leanok
+    \uses{def:allocdate}
+    The ``never'' symbol \texttt{none} is distinct from every real date \texttt{some}~$n$, and
+    distinct dates encode to distinct values. So the \texttt{Option}~$\mathbb N$ encoding loses no
+    information and does not accidentally identify $\emptyset$ with a date.
+\end{lemma}
+
+%======================================================================
+% §2.2 Reduced-form values
+%======================================================================
+\begin{definition}[Date values $U_t,V_t$]\label{def:datevalues}
+    \lean{DMC.DateValues}\leanok
+    \uses{def:belief}
+    For one conditioning richness $\mathcal G$, the paper's continuation value $U_t(\mu)$ (maximal
+    conditional expected equilibrium payoff at posterior $\mu$, date $t$) and truncation value
+    $V_t(\mu)$ (the within-date/truncated-subgame value). In Lean, \texttt{DateValues}~$\Theta$
+    bundles $U,V:\mathbb N\to\Delta(\Theta)\to\mathbb R$ with exactly the properties used
+    downstream:
+    \begin{itemize}
+      \item \texttt{V\_nonneg}: $V_t\ge 0$ \emph{[faithful]} --- the absorbing no-sale node pays $0$;
+      \item \texttt{V\_le\_U}: $V_t\le U_t$ \emph{[weakening]} --- deferring is an option, so this is
+        a genuine ``$\le$'', not an equality (witnessed by Lemma~\ref{lem:model-vltu});
+      \item \texttt{U\_bddAbove}: $U$ is uniformly bounded above \emph{[faithful]} ---
+        Assumption~2(iv), equilibrium values are finite.
+    \end{itemize}
+\end{definition}
+
+\begin{definition}[Date-wise envelope $g=\sup_t U_t$]\label{def:envelope}
+    \lean{DMC.DateValues.envelope}\leanok
+    \uses{def:datevalues}
+    The paper's upper envelope $g(\mu):=\sup_t U_t(\mu)$ (resp.\ $\hat g$ for a richer
+    conditioning). \emph{[faithful]} Transparency: this really is the supremum
+    (Lemma~\ref{lem:model-envelope}); a richer conditioning weakly raises it,
+    $g\le\hat g$ (\texttt{DMC.DateValues.envelope\_mono}).
+\end{definition}
+
+\begin{definition}[Single-shot structure (Assumption~1)]\label{def:singleshot}
+    \lean{DMC.SingleShot}\leanok
+    \uses{def:datevalues, lem:posterior-martingale}
+    A \texttt{DateValues} together with the belief-martingale conditional-expectation operator and
+    the single-shot stopping recursion. Its fields:
+    \begin{itemize}
+      \item \texttt{condExp}~$\varphi\,t\,\mu=\mathbb E[\varphi(S_{t+1})\mid S_t=\mu]$, the expected
+        next-date value of a belief functional \emph{[encoding]};
+      \item \texttt{condExp\_mono}: it is a positive (monotone) Markov operator \emph{[faithful]};
+      \item \texttt{affine\_harmonic}: affine functionals $\nu\mapsto\int\lambda\,d\nu$ are harmonic
+        (Bayes-plausibility) \emph{[faithful]} --- the operative form of the posterior-martingale
+        property (Lemma~\ref{lem:martingale});
+      \item \texttt{stopping}: $U_t(\mu)=\max\{V_t(\mu),\,\mathbb E[U_{t+1}\mid\mu]\}$
+        (\texttt{lem:stopping-form}) \emph{[encoding]} --- allocate now or defer, whichever is
+        larger; the $\max$ really is that decision (Lemma~\ref{lem:model-stop-iff}).
+    \end{itemize}
+\end{definition}
+
+%======================================================================
+% Faithfulness audit (Meta/ModelFaithfulness.lean): definitions -> green facts
+%======================================================================
+\begin{lemma}[Faithfulness: the axioms are consistent (non-vacuous)]\label{lem:model-consistent}
+    \lean{DMC.singleShot_consistent}\leanok
+    \uses{def:singleshot}
+    The \texttt{SingleShot} axiom bundle (\texttt{V\_nonneg}, \texttt{V\_le\_U},
+    \texttt{U\_bddAbove}, \texttt{condExp\_mono}, \texttt{affine\_harmonic}, \texttt{stopping}) is
+    \textbf{jointly satisfiable}: a concrete witness over the genuine compact Polish space
+    \texttt{unitInterval} (\texttt{DMC.frozenBeliefWitness}) type-checks. Hence the \S3 theorems
+    that quantify over \texttt{SingleShot} are not vacuously true.
+\end{lemma}
+
+\begin{lemma}[Faithfulness: deferral is a real option ($V<U$)]\label{lem:model-vltu}
+    \lean{DMC.witness_V_lt_U}\leanok
+    \uses{lem:model-consistent}
+    In the witness, $V_t(\mu)<U_t(\mu)$ strictly at every date and belief. So \texttt{V\_le\_U} is
+    a genuine inequality (deferral strictly available) and is not a hidden $V=U$ collapse.
+\end{lemma}
+
+\begin{lemma}[Faithfulness: the $\max$ encodes stop-vs.-continue]\label{lem:model-stop-iff}
+    \lean{DMC.SingleShot.stop_iff}\leanok
+    \uses{def:singleshot}
+    ``Allocate now'' ($U_t=V_t$) holds \emph{iff} deferral is (weakly) worse than allocating. So
+    the $\max$ in \texttt{stopping} transparently encodes the stopping decision.
+\end{lemma}
+
+\begin{lemma}[Faithfulness: Bayes-plausibility fixes constants]\label{lem:model-condexp-const}
+    \lean{DMC.SingleShot.condExp_const}\leanok
+    \uses{def:singleshot}
+    A constant belief functional is harmonic --- its expected next value is itself. This is the
+    $\lambda\equiv c$ case of \texttt{affine\_harmonic}: total probability is conserved across
+    dates, confirming the operator is a genuine (belief-)martingale expectation.
+\end{lemma}
+
+\begin{lemma}[Faithfulness: the envelope is transparently $\sup_t U_t$]\label{lem:model-envelope}
+    \lean{DMC.DateValues.envelope_eq_iSup}\leanok
+    \uses{def:envelope}
+    \texttt{DateValues.envelope} unfolds definitionally to $\sup_t U_t$, matching the paper's $g$.
+\end{lemma}

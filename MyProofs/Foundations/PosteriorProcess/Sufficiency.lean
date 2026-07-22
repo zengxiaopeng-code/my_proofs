@@ -1,4 +1,4 @@
-import MyProofs.PosteriorProcess.Existence
+import MyProofs.Foundations.PosteriorProcess.Existence
 
 /-!
 # Lemma 1 (Posterior process): sufficiency (Part (i))

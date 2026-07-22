@@ -1,8 +1,8 @@
-import MyProofs.PosteriorProcess.Basic
-import MyProofs.PosteriorProcess.Existence
-import MyProofs.PosteriorProcess.Sufficiency
-import MyProofs.PosteriorProcess.DoobDynkin
-import MyProofs.PosteriorProcess.Martingale
+import MyProofs.Foundations.PosteriorProcess.Basic
+import MyProofs.Foundations.PosteriorProcess.Existence
+import MyProofs.Foundations.PosteriorProcess.Sufficiency
+import MyProofs.Foundations.PosteriorProcess.DoobDynkin
+import MyProofs.Foundations.PosteriorProcess.Martingale
 
 /-!
 # Lemma 1「Posterior process」聚合入口

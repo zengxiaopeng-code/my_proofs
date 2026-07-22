@@ -1,4 +1,5 @@
-import MyProofs.PosteriorProcess
+import MyProofs.Foundations.PosteriorProcess
+import MyProofs.Meta.ModelFaithfulness
 
 /-!
 # Verification audit
@@ -32,3 +33,13 @@ open PosteriorProcess
 #print axioms factorization_posterior
 -- (iii) Martingale property
 #print axioms testfun_martingale
+
+-- Model (§2) faithfulness: the axiom bundle is consistent and the encodings are transparent.
+-- Each should depend only on the standard three axioms (no `sorryAx`).
+#print axioms DMC.frozenBeliefWitness
+#print axioms DMC.singleShot_consistent
+#print axioms DMC.witness_V_lt_U
+#print axioms DMC.SingleShot.stop_iff
+#print axioms DMC.SingleShot.condExp_const
+#print axioms DMC.DateValues.envelope_eq_iSup
+#print axioms DMC.allocDate_never_ne_date

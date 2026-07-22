@@ -2,25 +2,53 @@
 %   \lean{decl}  links to a specific Lean declaration (verified to exist by checkdecls).
 %   \leanok      used ONLY for nodes fully proved by the Lean kernel (no sorry) -> green in the graph.
 %                Nodes with sorry / a library gap get only \lean (no \leanok) and state their status in prose.
-%   \uses{...}   dependencies (edges of the dependency graph).
+%   \uses{...}   dependencies (edges of the dependency graph). \uses takes labels, so it is unaffected
+%                by which environment (lemma/step/faithcheck) a node uses.
+% ROLE-DISTINCT ENVIRONMENTS (see macros/common.tex):
+%   lemma/theorem/definition = the PAPER's own statement (title cites the paper's number/section);
+%   step                     = a sub-lemma decomposing a Lean proof (NOT a paper lemma);
+%   faithcheck               = a machine-checked faithfulness audit (NOT paper math).
 % The verbatim statement and proof are in docs/paper-lemma1.md (single source of truth);
 % this chapter is its formalization decomposition. Language: English, matching the paper.
 
 \chapter{Lemma 1: Posterior process}
 
-This chapter formalizes \textbf{Lemma 1 (Posterior process)} of the paper (label
-\texttt{lem:posterior-martingale}). \textbf{The verbatim statement and proof are in
-\texttt{docs/paper-lemma1.md}}; this chapter decomposes that proof, following the paper's own
-four steps, into separate nodes.
+\noindent\textbf{Legend --- what each node is.} This blueprint mixes three kinds of node; the
+\emph{environment name} tells you which:
+\begin{itemize}
+  \item \textbf{Definition / Lemma / Theorem} --- a statement \emph{from the paper}. Its title cites
+    the paper's own location or number. (E.g.\ the node ``Lemma~1'' below is the paper's Lemma~1.)
+  \item \textbf{Step} --- a sub-lemma that only decomposes a Lean \emph{proof}; it is \emph{not} a
+    lemma in the paper. Numbered on its own counter (Step~1, 2, \dots).
+  \item \textbf{Faithfulness check} --- a machine-checked audit that the Lean \emph{encoding} matches
+    the paper (\S Model chapter); it is not mathematical content of the paper. Own counter.
+\end{itemize}
+The actual formal object is always the \textbf{Lean declaration} reached via the
+\textsf{L$\exists\forall$N} icon. The ``Lemma~$N$''/``Definition~$N$'' numbers here are internal to
+this blueprint and are \emph{not} the paper's numbering, \emph{except} where a title says so.
+
+\medskip
+\noindent\textbf{Paper $\leftrightarrow$ Lean correspondence (top level).}
+\begin{itemize}
+  \item \textbf{Paper Lemma~1} (posterior process) $\;\leftrightarrow\;$ \texttt{kernel\_exists} $+$
+    \texttt{factorization\_posterior} $+$ \texttt{testfun\_martingale}; its proof =
+    Steps~\ref{lem:existence}, \ref{lem:sufficiency}, \ref{lem:factorization}, \ref{lem:martingale}.
+  \item \textbf{Paper \S2.1 environment} $\leftrightarrow$ Definition~\ref{def:setup}.
+    Belief space $\Delta(\Theta)\leftrightarrow$ \texttt{DMC.Belief}; allocation date
+    $\leftrightarrow$ \texttt{DMC.AllocDate} (Model chapter).
+  \item \textbf{Paper \S2.2 values} $U_t,V_t,g\leftrightarrow$ \texttt{DMC.DateValues}; Assumptions~1--2
+    $\leftrightarrow$ \texttt{DMC.SingleShot} (Model chapter).
+  \item \emph{No paper counterpart:} every \textbf{Step} and \textbf{Faithfulness check} node --- these
+    are formalization artifacts (proof decomposition, resp.\ encoding audits), not paper statements.
+\end{itemize}
 
 \noindent\textbf{How to read this page.} Hover over a statement's title bar to reveal a row of
 small icons, then click the \textsf{L$\exists\forall$N} icon to open the Lean declaration that
-formalizes it (it takes you to the API documentation showing the exact Lean statement). A
-statement is coloured green exactly when the Lean kernel has fully verified it (no
-\texttt{sorry}). \textbf{Lemma 1} below is the paper's full statement; the lemmas after it
-(Lemma~2, 3, \dots) are the steps of its proof, each linked to its own Lean declaration.
+formalizes it. A statement is coloured green exactly when the Lean kernel has fully verified it (no
+\texttt{sorry}). \textbf{The verbatim statement and proof are in \texttt{docs/paper-lemma1.md}};
+this chapter decomposes that proof, following the paper's own four steps.
 
-\begin{definition}[Environment]\label{def:setup}
+\begin{definition}[Environment (paper \S2.1)]\label{def:setup}
     Discrete time $t\in\mathbb T=\{0,1,2,\dots\}$. A Borel probability space
     $(\Omega,\mathcal F,\mathbb P)$; primitive state $\theta:\Omega\to\Theta$ with $\Theta$
     compact Polish; $\Delta(\Theta)$ the space of Borel probability measures on $\Theta$ (weak
@@ -29,9 +57,9 @@ statement is coloured green exactly when the Lean kernel has fully verified it (
 \end{definition}
 
 %======================================================================
-% Main statement (verbatim); its proof is decomposed into the four step-nodes below.
+% Main statement (paper Lemma 1, verbatim); its proof is decomposed into the four step-nodes below.
 %======================================================================
-\begin{lemma}[Posterior process]\label{lem:posterior-martingale}
+\begin{lemma}[Posterior process --- \textbf{paper Lemma 1}]\label{lem:posterior-martingale}
     \lean{PosteriorProcess.kernel_exists, PosteriorProcess.factorization_posterior,
       PosteriorProcess.testfun_martingale}\leanok
     \uses{def:setup}
@@ -51,23 +79,23 @@ statement is coloured green exactly when the Lean kernel has fully verified it (
 \begin{proof}\leanok
     \uses{lem:existence, lem:sufficiency, lem:factorization, lem:martingale}
     The statement is the conjunction of the four steps below: existence and the kernel property
-    (Lemma~\ref{lem:existence}), sufficiency (Lemma~\ref{lem:sufficiency}, part~(i)),
-    factorization through $Z_t$ (Lemma~\ref{lem:factorization}, part~(ii)), and the martingale
-    property (Lemma~\ref{lem:martingale}, part~(iii)). The verbatim proof is in
+    (Step~\ref{lem:existence}), sufficiency (Step~\ref{lem:sufficiency}, part~(i)),
+    factorization through $Z_t$ (Step~\ref{lem:factorization}, part~(ii)), and the martingale
+    property (Step~\ref{lem:martingale}, part~(iii)). The verbatim proof is in
     \texttt{docs/paper-lemma1.md}.
 \end{proof}
 
 %======================================================================
 % Step 1: existence + kernel property
 %======================================================================
-\begin{lemma}[Existence of the posterior kernel]\label{lem:existence}
+\begin{step}[Existence of the posterior kernel]\label{lem:existence}
     \lean{PosteriorProcess.kernel_exists}\leanok
     \uses{def:setup}
     For each $t$, there exists an $\mathcal F_t$-measurable $S_t:\Omega\to\Delta(\Theta)$ such
     that, for every bounded Borel $\varphi$, the map
     $\omega\mapsto\int_\Theta\varphi\,dS_t(\omega)$ equals
     $\mathbb E[\varphi(\theta)\mid\mathcal F_t]$ almost surely.
-\end{lemma}
+\end{step}
 \begin{proof}\leanok
     $\Theta$ compact Polish $\Rightarrow$ standard Borel; the claim follows from the existence
     of regular conditional distributions (Kallenberg 2002, Thm~6.3). In Lean the kernel is the
@@ -78,13 +106,13 @@ statement is coloured green exactly when the Lean kernel has fully verified it (
 %======================================================================
 % Step 2: (i) sufficiency
 %======================================================================
-\begin{lemma}[Part (i): Sufficiency]\label{lem:sufficiency}
+\begin{step}[Part (i): Sufficiency]\label{lem:sufficiency}
     \lean{PosteriorProcess.sufficiency}\leanok
     \uses{lem:existence}
     Conditioning on $S_t$ and conditioning on $\mathcal F_t$ yield the same conditional
     distribution of $\theta$; that is, $S_t$ is a sufficient statistic for $\theta$ given
     $\mathcal F_t$.
-\end{lemma}
+\end{step}
 \begin{proof}\leanok
     For bounded Borel $\varphi$, the map $F(\mu):=\int\varphi\,d\mu$ is Borel measurable on
     $\Delta(\Theta)$ by the functional monotone class theorem (it holds for continuous $\varphi$
@@ -97,22 +125,22 @@ statement is coloured green exactly when the Lean kernel has fully verified it (
 %======================================================================
 % Step 3: (ii) Doob-Dynkin -- abstract layer (proved) + library gap + full version
 %======================================================================
-\begin{lemma}[Abstract Doob--Dynkin factorization]\label{lem:doob-abstract}
+\begin{step}[Abstract Doob--Dynkin factorization]\label{lem:doob-abstract}
     \lean{PosteriorProcess.factorization}\leanok
     If $S$ is $\sigma(Z)$-measurable and takes values in a standard Borel space, then
     $S=f\circ Z$ for some Borel measurable $f$.
-\end{lemma}
+\end{step}
 \begin{proof}\leanok
     Mathlib's \texttt{Measurable.exists\_eq\_measurable\_comp}. Verified by the Lean kernel, no
     \texttt{sorry}.
 \end{proof}
 
-\begin{lemma}[$\Delta(\Theta)$ is standard Borel]\label{lem:deltaTheta-sb}
+\begin{step}[$\Delta(\Theta)$ is standard Borel]\label{lem:deltaTheta-sb}
     \lean{PosteriorProcess.deltaTheta_standardBorel}\leanok
     \uses{def:setup}
     $\Delta(\Theta)$ (Borel probability measures on the compact Polish space $\Theta$, weak
     topology) is a standard Borel space.
-\end{lemma}
+\end{step}
 \begin{proof}\leanok
     This was a gap in Mathlib, now proved from scratch in two halves: $\Delta(\Theta)$ carries a
     Polish topology (compact by Prokhorov + metrizable by Lévy--Prokhorov, hence completely
@@ -120,28 +148,28 @@ statement is coloured green exactly when the Lean kernel has fully verified it (
     weak topology. Verified by the Lean kernel, no \texttt{sorry}.
 \end{proof}
 
-\begin{lemma}[Part (ii): Induction by $Z_t$]\label{lem:factorization}
+\begin{step}[Part (ii): Induction by $Z_t$]\label{lem:factorization}
     \lean{PosteriorProcess.factorization_posterior}\leanok
     \uses{lem:existence, lem:doob-abstract, lem:deltaTheta-sb}
     Since $\mathcal F_t=\sigma(Z_t)$, there is a Borel measurable $f_t:E_t\to\Delta(\Theta)$ with
     $S_t=f_t(Z_t)$ a.s.; the public history $Z_t$ induces the posterior $S_t$.
-\end{lemma}
+\end{step}
 \begin{proof}\leanok
-    Apply the abstract factorization (Lemma~\ref{lem:doob-abstract}) to $\Delta(\Theta)$, which
-    is standard Borel (Lemma~\ref{lem:deltaTheta-sb}). Verified by the Lean kernel, no
+    Apply the abstract factorization (Step~\ref{lem:doob-abstract}) to $\Delta(\Theta)$, which
+    is standard Borel (Step~\ref{lem:deltaTheta-sb}). Verified by the Lean kernel, no
     \texttt{sorry}.
 \end{proof}
 
 %======================================================================
 % Step 4: (iii) martingale property (proved)
 %======================================================================
-\begin{lemma}[Part (iii): Martingale property]\label{lem:martingale}
+\begin{step}[Part (iii): Martingale property]\label{lem:martingale}
     \lean{PosteriorProcess.testfun_martingale}\leanok
     \uses{lem:existence}
     For every bounded Borel $\varphi$, the real-valued process
     $t\mapsto\int_\Theta\varphi\,dS_t$ is an $(\mathcal F_t)$-martingale; hence $\{S_t\}$ is a
     bounded measure-valued martingale.
-\end{lemma}
+\end{step}
 \begin{proof}\leanok
     By the tower property, $\mathbb E[\int\varphi\,dS_t\mid\mathcal F_s]
     =\mathbb E[\varphi(\theta)\mid\mathcal F_s]=\int\varphi\,dS_s$ for $s\le t$. Mathlib's

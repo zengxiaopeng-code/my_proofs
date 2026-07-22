@@ -1,10 +1,17 @@
 % 两个版本（pdf 与 web）共用的宏与定理环境定义。
+%
+% 角色分环境（消除"论文 Lemma vs 形式化 lemma"的混淆）：
+%   Definition / Lemma / Theorem —— 只用于**论文自己的陈述**，标题里注明论文位置/编号；
+%   Step ——只是分解某条 Lean 证明的子引理，**不是论文里的引理**，独立计数（Step 1,2,…）；
+%   Faithfulness check ——机器核对"Lean 编码 = 论文"的忠实性审计，**不是论文数学内容**，独立计数。
+% 三者各用独立计数器，故 blueprint 里的 "Lemma N" 不会和 Step/Check 混号。
+% 依赖图节点收录集在 web.tex 的 \usepackage[...]{blueprint} 的 thms= 选项里同步登记。
 \newtheorem{theorem}{Theorem}
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{step}{Step}
 
-% Definition 用独立计数器：主命题因此是 "Lemma 1"（= 论文 Lemma 1），
-% Environment 则是 "Definition 1"（标准 setup 写法；plastex 不支持不编号 \newtheorem*）。
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
+\newtheorem{faithcheck}{Faithfulness check}

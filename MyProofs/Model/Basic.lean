@@ -25,7 +25,10 @@ namespace DMC
 Polish it is a compact standard Borel space (`deltaTheta_standardBorel`). -/
 abbrev Belief (Θ : Type*) [MeasurableSpace Θ] := ProbabilityMeasure Θ
 
-/-- The allocation date `τ ∈ {1,2,…} ∪ {∅}` (Timeline). `none` is `∅`: no sale ever occurs. -/
-abbrev AllocDate := Option ℕ
+/-- The allocation date `τ ∈ {1,2,…} ∪ {∅}` (Timeline). `none` is `∅`: no sale ever occurs.
+
+Dates are `{n : ℕ // 1 ≤ n}`, not `ℕ`: the paper's `τ` starts at **1**, so a plain `Option ℕ`
+would admit a spurious `some 0` with no counterpart in the paper. -/
+abbrev AllocDate := Option {n : ℕ // 1 ≤ n}
 
 end DMC

@@ -8,3 +8,9 @@
 # plastex 中间产物
 *.paux
 blueprint/src/*.paux
+
+# 未发表论文原文（私密，绝不入库）。正稿放在仓库外 ../paper-source/；
+# 这里只是防御：万一有人把 .tex 拷进本仓库也不追踪。
+# 注意：blueprint/src/*.tex 是合法对照桥，不在此列（用文件名前缀精确匹配）。
+/paper-source/
+MDC-*.tex

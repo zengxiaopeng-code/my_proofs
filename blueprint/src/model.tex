@@ -40,36 +40,41 @@ much of that as possible into green, kernel-checked facts (mirrors \texttt{Meta/
 \begin{definition}[Allocation date $\tau$ (paper \S2.1, Timeline)]\label{def:allocdate}
     \lean{DMC.AllocDate}\leanok
     The allocation date is $\tau\in\{1,2,\dots\}\cup\{\emptyset\}$, where $\emptyset$ means ``no
-    sale ever occurs''. \emph{[encoding]} In Lean it is \texttt{Option}~$\mathbb N$, with
-    \texttt{none}$=\emptyset$. Faithfulness of this encoding is
-    Faithfulness check~\ref{fc:allocdate}.
+    sale ever occurs''. \emph{[encoding]} In Lean it is
+    \texttt{Option \{n : $\mathbb N$ // 1 $\le$ n\}}, with \texttt{none}$=\emptyset$ --- the dates
+    carry the paper's constraint $\tau\ge 1$, so no spurious date $0$ is representable. Faithfulness
+    of this encoding is Faithfulness check~\ref{fc:allocdate}.
 \end{definition}
 
 \begin{faithcheck}[$\emptyset$ is a genuine ``never''; dates are preserved]\label{fc:allocdate}
-    \lean{DMC.allocDate_never_ne_date, DMC.allocDate_date_injective}\leanok
+    \lean{DMC.allocDate_never_ne_date, DMC.allocDate_date_injective,
+      DMC.allocDate_date_ge_one}\leanok
     \uses{def:allocdate}
-    The ``never'' symbol \texttt{none} is distinct from every real date \texttt{some}~$n$, and
-    distinct dates encode to distinct values. So the \texttt{Option}~$\mathbb N$ encoding loses no
-    information and does not accidentally identify $\emptyset$ with a date.
+    The ``never'' symbol \texttt{none} is distinct from every real date \texttt{some}~$n$; distinct
+    dates encode to distinct values; and every encoded date satisfies $\tau\ge1$. So the encoding
+    loses no information, never identifies $\emptyset$ with a date, and admits no value outside the
+    paper's range $\{1,2,\dots\}\cup\{\emptyset\}$.
 \end{faithcheck}
 
 %======================================================================
 % §2.2 Reduced-form values
 %======================================================================
-\begin{definition}[Date values $U_t,V_t$ (paper \S2.2)]\label{def:datevalues}
+\begin{definition}[Date values $U_t,V_t$ --- \emph{interface}]\label{def:datevalues}
     \lean{DMC.DateValues}\leanok
     \uses{def:belief}
-    For one conditioning richness $\mathcal G$, the paper's continuation value $U_t(\mu)$ (maximal
-    conditional expected equilibrium payoff at posterior $\mu$, date $t$) and truncation value
-    $V_t(\mu)$ (the within-date/truncated-subgame value). In Lean, \texttt{DateValues}~$\Theta$
-    bundles $U,V:\mathbb N\to\Delta(\Theta)\to\mathbb R$ with exactly the properties used
-    downstream:
+    \textbf{This is the downstream \emph{interface}, not the paper's definition.} The paper
+    \emph{defines} $U_t$ and $V_t$ as suprema over mechanism rules and payoff selections
+    (Definitions~\ref{def:contvalue} and~\ref{def:truncvalue}); \texttt{DateValues} only records the
+    properties \S3 consumes. It is now \emph{constructed} from those definitions by
+    \texttt{toDateValues} (Faithfulness check~\ref{fc:datevalues-derived}), so the fields below are
+    no longer assumptions. In Lean it bundles $U,V:\mathbb N\to\Delta(\Theta)\to\mathbb R$ with:
     \begin{itemize}
-      \item \texttt{V\_nonneg}: $V_t\ge 0$ \emph{[faithful]} --- the absorbing no-sale node pays $0$;
+      \item \texttt{V\_nonneg}: $V_t\ge 0$ --- the absorbing no-sale node pays $0$; now
+        \emph{derived} (Faithfulness check~\ref{fc:vnonneg});
       \item \texttt{V\_le\_U}: $V_t\le U_t$ \emph{[weakening]} --- deferring is an option, so this is
         a genuine ``$\le$'', not an equality (witnessed by Faithfulness check~\ref{fc:vltu});
-      \item \texttt{U\_bddAbove}: $U$ is uniformly bounded above \emph{[faithful]} ---
-        Assumption~2(iv), equilibrium values are finite.
+      \item \texttt{U\_bddAbove}: $U$ is uniformly bounded above --- Assumption~2(iv), equilibrium
+        values are finite; now \emph{derived} (Faithfulness check~\ref{fc:ubdd}).
     \end{itemize}
 \end{definition}
 
@@ -82,11 +87,14 @@ much of that as possible into green, kernel-checked facts (mirrors \texttt{Meta/
     $g\le\hat g$ (\texttt{DMC.DateValues.envelope\_mono}).
 \end{definition}
 
-\begin{definition}[Single-shot structure (paper Assumptions~1--2)]\label{def:singleshot}
+\begin{definition}[Single-shot structure --- \emph{interface}]\label{def:singleshot}
     \lean{DMC.SingleShot}\leanok
     \uses{def:datevalues, lem:posterior-martingale}
     A \texttt{DateValues} together with the belief-martingale conditional-expectation operator and
-    the single-shot stopping recursion. Its fields:
+    the single-shot stopping recursion. \textbf{It does \emph{not} carry Assumption~1}: the paper's
+    Assumption~1 is the economic statement that the resource is allocated at most once, whereas this
+    structure carries its \emph{consequence}. Of Assumption~2 only clause~(iv) appears (inherited
+    from \texttt{DateValues}). Its fields:
     \begin{itemize}
       \item \texttt{condExp}~$\varphi\,t\,\mu=\mathbb E[\varphi(S_{t+1})\mid S_t=\mu]$, the expected
         next-date value of a belief functional \emph{[encoding]};
@@ -95,10 +103,113 @@ much of that as possible into green, kernel-checked facts (mirrors \texttt{Meta/
         (Bayes-plausibility) \emph{[faithful]} --- the operative form of the posterior-martingale
         property (Step~\ref{lem:martingale});
       \item \texttt{stopping}: $U_t(\mu)=\max\{V_t(\mu),\,\mathbb E[U_{t+1}\mid\mu]\}$
-        \emph{[encoding]} --- allocate now or defer, whichever is larger; the $\max$ really is that
-        decision (Faithfulness check~\ref{fc:stop}).
+        \emph{[strengthening]} --- allocate now or defer, whichever is larger. \textbf{The paper
+        \emph{derives} this} (\texttt{eq:stopping-form}: the continuation value is the Snell envelope
+        of the truncation values, by \texttt{lem:stopping-form} from Assumption~1); here it is
+        assumed. It is the \emph{only} remaining assumed item of the model layer. The $\max$ really
+        is the stop-or-continue decision (Faithfulness check~\ref{fc:stop}).
     \end{itemize}
 \end{definition}
+
+%======================================================================
+% §2.2 primitives: U_t and V_t as DEFINITIONS (Model/Primitives.lean)
+%======================================================================
+\section*{The paper's primitives: $U_t$ and $V_t$ as definitions}
+
+The paper does not postulate $U_t$; it \emph{defines} it as a supremum over continuation mechanism
+rules and payoff selections. It also never constructs the strategy--belief profiles $\mathcal B_t$,
+the sequentially rational Bayesian equilibria $\mathcal E_t$, or the payoff $\pi_t$: it constrains
+them by Assumption~2 and works with the induced payoff correspondence $\mathcal R_t^{\Gamma_t}$.
+The nodes below put the Lean abstraction boundary \textbf{at the same place}, so that $U_t$, $V_t$
+and the monotonicity in $\mathcal G$ become definitions and theorems rather than axioms.
+
+\begin{definition}[Payoff selections $\Sel(\mathcal R_t^{\Gamma_t})$ (paper \S2.2)]\label{def:selections}
+    \lean{DMC.Paper.Sel}\leanok
+    For a continuation mechanism rule $\Gamma_t$, the set of measurable payoff selections of the
+    induced payoff correspondence $\mathcal R_t^{\Gamma_t}$. \emph{[deviation]} The paper uses
+    \emph{universally} measurable selections; Lean uses Borel measurable ones, which shrinks the
+    feasible set and hence makes the $U_t$ below $\le$ the paper's.
+\end{definition}
+
+\begin{definition}[Continuation value $U_t^{\mathcal G}$ (paper \S2.2)]\label{def:contvalue}
+    \lean{DMC.Paper.U}\leanok
+    \uses{def:belief, def:selections}
+    \emph{[faithful]} The paper's definition, transcribed:
+    \[
+      U_t^{\mathcal G}(\mu)\;:=\;\sup\Bigl\{\int_\Omega \rho\,d\mathbb P_t^\mu \;:\;
+        \Gamma\text{ is }\mathcal G\text{-measurable},\ \rho\in\Sel(\mathcal R_t^{\Gamma})\Bigr\}.
+    \]
+    The payoff correspondence $\mathcal R_t^{\Gamma}$ and the conditional law $\mathbb P_t^\mu$ are
+    parameters, exactly as in the paper.
+\end{definition}
+
+\begin{definition}[Truncation value $V_t^{\mathcal G}$ (paper \S3.3)]\label{def:truncvalue}
+    \lean{DMC.Paper.V}\leanok
+    \uses{def:contvalue}
+    \emph{[faithful]} The same supremum, over the \emph{truncation} payoff correspondence
+    $\mathcal V_t^{\Gamma}$ (every public continuation replaced by the absorbing no-sale node).
+\end{definition}
+
+\begin{definition}[Admissible richness and collapse (paper \S2.3)]\label{def:collapse}
+    \lean{DMC.Paper.AdmissibleRichness, DMC.Paper.ValueCollapse}\leanok
+    \uses{def:contvalue}
+    \emph{[faithful]} The paper's state decomposition $Z_t=(S_t,Y_t)$ and the sandwich
+    $\sigma(S_t)\subseteq\mathcal G\subseteq\sigma(S_t,Y_t)$, expressed with the order on
+    \texttt{MeasurableSpace}~$\Omega$; and \emph{continuation value collapse}
+    $U_t^{\sigma(S_t,Y_t)}(\mu)=U_t^{\mathcal G}(\mu)$ for all $\mu$. Before $U_t$ was a definition,
+    none of this was expressible.
+\end{definition}
+
+\begin{faithcheck}[Richer conditioning raises $U_t$ --- now a \emph{theorem}]\label{fc:umono}
+    \lean{DMC.Paper.U_mono_of_le}\leanok
+    \uses{def:contvalue}
+    The paper's ``allowing richer public states expands each date-$t$ continuation value $U_t$'' is
+    proved: $\mathcal G_1\subseteq\mathcal G_2$ admits more mechanism rules, so the supremum runs
+    over a larger set. \textbf{This was previously a bare hypothesis} (the argument of
+    \texttt{DateValues.envelope\_mono}) --- the largest faithfulness hole in the model layer.
+\end{faithcheck}
+
+\begin{faithcheck}[$U_t$ bounded --- derived from Assumption~2(iv)]\label{fc:ubdd}
+    \lean{DMC.Paper.U_bddAbove_of_bound}\leanok
+    \uses{def:contvalue}
+    Assumption~2(iv) (``the payoff correspondence is uniformly bounded above: equilibrium values are
+    finite'') now \emph{implies} the uniform bound on $U$. The paper assumes boundedness of
+    $\mathcal R_t^{\Gamma}$; \texttt{DateValues.U\_bddAbove} assumed it directly on $U$, one level
+    too high.
+\end{faithcheck}
+
+\begin{faithcheck}[$V_t\ge 0$ --- derived from the no-sale node]\label{fc:vnonneg}
+    \lean{DMC.Paper.V_nonneg}\leanok
+    \uses{def:truncvalue}
+    The paper says ``\emph{By construction} $V_t^{\mathcal G_t}\ge 0$'': the truncation's absorbing
+    no-sale node pays $0$, so the zero selection is always feasible. Assuming that \emph{primitive},
+    $V\ge0$ is proved. Previously the axiom field \texttt{DateValues.V\_nonneg}.
+\end{faithcheck}
+
+\begin{faithcheck}[$V_t\le U_t$ --- derived from the stopping form]\label{fc:vleu-stop}
+    \lean{DMC.Paper.V_le_U_of_stopping}\leanok
+    \uses{def:truncvalue}
+    From \texttt{eq:stopping-form} $U_t=\max\{V_t,\ \mathbb E[U_{t+1}\mid\mu]\}$, the inequality
+    $V_t\le U_t$ is immediate. So \texttt{V\_le\_U} is no longer an independent assumption; the
+    stopping form is the \emph{single} remaining assumed item (see Definition~\ref{def:singleshot}).
+\end{faithcheck}
+
+\begin{faithcheck}[\texttt{DateValues} is now \emph{derived}, not postulated]\label{fc:datevalues-derived}
+    \lean{DMC.Paper.toDateValues, DMC.Paper.toDateValues_U}\leanok
+    \uses{def:datevalues, fc:ubdd, fc:vnonneg, fc:vleu-stop}
+    \texttt{toDateValues} builds a \texttt{DateValues} from the paper's definitions: \texttt{U} is
+    the defined $U_t^{\mathcal G}$ (\texttt{toDateValues\_U}, definitionally), \texttt{U\_bddAbove}
+    comes from Assumption~2(iv) and \texttt{V\_nonneg} from the no-sale primitive. Everything
+    downstream (\S3, including the belief-space no-gain theorem) consumes \texttt{DateValues}
+    unchanged --- but the instance it consumes is now derived from the paper's $U_t$.
+\end{faithcheck}
+
+\begin{faithcheck}[Collapse is exactly the reverse inequality]\label{fc:collapse-iff}
+    \lean{DMC.Paper.valueCollapse_iff}\leanok
+    \uses{def:collapse, fc:umono}
+    Since the full-history value always dominates (Faithfulness check~\ref{fc:umono}), collapse
+    holds iff the richer value is also $\le$ the coarser one.
+\end{faithcheck}
 
 %======================================================================
 % Faithfulness audit (Meta/ModelFaithfulness.lean): definitions -> green facts

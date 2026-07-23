@@ -20,8 +20,8 @@ in three registers:
   make every §3 theorem vacuously true, and nothing would flag it.
 * **(B) Transparency** (`DateValues.envelope_eq_iSup`, `SingleShot.stop_iff`,
   `SingleShot.condExp_const`, `allocDate_*`): each encoded object unfolds to the paper's plain
-  statement — the `Option ℕ` allocation date really has a distinguished "never" apart from every
-  real date; `envelope` really is `sup_t U_t`; the `max` in `stopping` really encodes "stop iff
+  statement — the allocation date really has a distinguished "never" apart from every real date,
+  and its dates start at 1 as in the paper; `envelope` really is `sup_t U_t`; the `max` in `stopping` really encodes "stop iff
   the truncation value beats deferral"; Bayes-plausibility really fixes constants.
 * **(C) Non-degeneracy** (`witness_V_lt_U`): the witness has `V < U` strictly somewhere, so
   `V_le_U` is a genuine `≤` (deferral is a real option), not a `V = U` collapse smuggled in.
@@ -35,17 +35,22 @@ open MeasureTheory
 
 namespace DMC
 
-/-! ### (B) `AllocDate = Option ℕ` is a faithful encoding of `{1,2,…} ∪ {∅}`
+/-! ### (B) `AllocDate` is a faithful encoding of `{1,2,…} ∪ {∅}`
 
 The paper's allocation date is a real date or the distinguished symbol `∅` ("no sale ever"). The
 encoding must keep `∅` apart from every real date and keep distinct dates distinct. -/
 
 /-- The "never allocate" symbol `∅ = none` is distinct from every real allocation date `some n`. -/
-theorem allocDate_never_ne_date (n : ℕ) : (none : AllocDate) ≠ some n := by simp
+theorem allocDate_never_ne_date (n : {n : ℕ // 1 ≤ n}) : (none : AllocDate) ≠ some n := by simp
 
 /-- Distinct dates encode to distinct `AllocDate`s (the encoding loses no date information). -/
-theorem allocDate_date_injective : Function.Injective (some : ℕ → AllocDate) :=
-  Option.some_injective ℕ
+theorem allocDate_date_injective :
+    Function.Injective (some : {n : ℕ // 1 ≤ n} → AllocDate) :=
+  Option.some_injective _
+
+/-- **The encoded range is exactly the paper's.** Every allocation date is `≥ 1`, matching
+`τ ∈ {1,2,…}`; the encoding admits no spurious date `0`. (A plain `Option ℕ` would.) -/
+theorem allocDate_date_ge_one (n : {n : ℕ // 1 ≤ n}) : 1 ≤ (n : ℕ) := n.2
 
 /-! ### (B) The envelope is transparently `sup_t U_t` -/
 

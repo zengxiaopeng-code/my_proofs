@@ -1,5 +1,6 @@
 import MyProofs.Foundations.PosteriorProcess
 import MyProofs.Meta.ModelFaithfulness
+import MyProofs.Meta.Faithfulness
 
 /-!
 # Verification audit
@@ -33,6 +34,9 @@ open PosteriorProcess
 #print axioms factorization_posterior
 -- (iii) Martingale property
 #print axioms testfun_martingale
+-- Δ(Θ) 是论文的对象:σ-代数 = 弱拓扑的 Borel;拓扑 = 弱拓扑
+#print axioms deltaTheta_measurableSpace_eq_borel
+#print axioms deltaTheta_tendsto_iff_integral
 
 -- Model (§2) faithfulness: the axiom bundle is consistent and the encodings are transparent.
 -- Each should depend only on the standard three axioms (no `sorryAx`).

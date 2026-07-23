@@ -21,7 +21,7 @@
   \item \textbf{Step} --- a sub-lemma that only decomposes a Lean \emph{proof}; it is \emph{not} a
     lemma in the paper. Numbered on its own counter (Step~1, 2, \dots).
   \item \textbf{Faithfulness check} --- a machine-checked audit that the Lean \emph{encoding} matches
-    the paper (\S Model chapter); it is not mathematical content of the paper. Own counter.
+    the paper; it is not mathematical content of the paper. Own counter.
 \end{itemize}
 The actual formal object is always the \textbf{Lean declaration} reached via the
 \textsf{L$\exists\forall$N} icon. The ``Lemma~$N$''/``Definition~$N$'' numbers here are internal to
@@ -36,8 +36,10 @@ this blueprint and are \emph{not} the paper's numbering, \emph{except} where a t
   \item \textbf{Paper \S2.1 environment} $\leftrightarrow$ Definition~\ref{def:setup}.
     Belief space $\Delta(\Theta)\leftrightarrow$ \texttt{DMC.Belief}; allocation date
     $\leftrightarrow$ \texttt{DMC.AllocDate} (Model chapter).
-  \item \textbf{Paper \S2.2 values} $U_t,V_t,g\leftrightarrow$ \texttt{DMC.DateValues}; Assumptions~1--2
-    $\leftrightarrow$ \texttt{DMC.SingleShot} (Model chapter).
+  \item \textbf{Paper \S2.2 values} $U_t,V_t\leftrightarrow$ \texttt{DMC.Paper.U},
+    \texttt{DMC.Paper.V} (the paper's defining suprema); $g\leftrightarrow$
+    \texttt{DMC.DateValues.envelope}. \texttt{DMC.DateValues}/\texttt{DMC.SingleShot} are the
+    downstream \emph{interface}, now derived via \texttt{DMC.Paper.toDateValues} (Model chapter).
   \item \emph{No paper counterpart:} every \textbf{Step} and \textbf{Faithfulness check} node --- these
     are formalization artifacts (proof decomposition, resp.\ encoding audits), not paper statements.
 \end{itemize}
@@ -147,6 +149,29 @@ this chapter decomposes that proof, following the paper's own four steps.
     metrizable), and its Giry $\sigma$-algebra coincides with the Borel $\sigma$-algebra of the
     weak topology. Verified by the Lean kernel, no \texttt{sorry}.
 \end{proof}
+
+\begin{faithcheck}[$\Delta(\Theta)$ is the paper's object: its σ-algebra and its topology]
+    \label{fc:deltaTheta-object}
+    \lean{PosteriorProcess.deltaTheta_measurableSpace_eq_borel,
+      PosteriorProcess.deltaTheta_tendsto_iff_integral}\leanok
+    \uses{lem:deltaTheta-sb}
+    Step~\ref{lem:deltaTheta-sb} is stated about Mathlib's \texttt{ProbabilityMeasure}~$\Theta$,
+    which carries Mathlib's \emph{Giry} measurable structure and Mathlib's topology of convergence
+    in distribution. The paper's $\Delta(\Theta)$ is the probability measures \emph{with the weak
+    topology} (and, for the Doob--Dynkin step, that topology's Borel σ-algebra). A priori these are
+    different structures, so a theorem about the wrong one would be true and useless. Two checks
+    close the gap:
+    \begin{itemize}
+      \item \textbf{σ-algebra}: the measurable structure on $\Delta(\Theta)$ \emph{equals} the Borel
+        σ-algebra of the weak topology --- the content of \texttt{deltaTheta\_borelSpace}, spelled
+        out as an equation rather than hidden in a \texttt{BorelSpace} instance.
+      \item \textbf{Topology}: convergence in $\Delta(\Theta)$ holds exactly when
+        $\int f\,d\mu$ converges for every bounded continuous $f$ --- the defining property of the
+        weak topology.
+    \end{itemize}
+    These are not extra assumptions; Mathlib's structures already are the right ones. The point is
+    that this is now kernel-checked and visible, rather than silently trusted.
+\end{faithcheck}
 
 \begin{step}[Part (ii): Induction by $Z_t$]\label{lem:factorization}
     \lean{PosteriorProcess.factorization_posterior}\leanok

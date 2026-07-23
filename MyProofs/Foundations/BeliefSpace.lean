@@ -218,4 +218,85 @@ theorem isClosed_range_emb : IsClosed (Set.range (emb : ProbabilityMeasure Θ �
 
 end Embedding
 
+section Duality
+
+/-!
+## Stage 4 — the dual of `E` is `C(Θ,ℝ)`
+
+The abstract No-gain theorem (`Concavification.nogain_iff`) produces a *supporting functional*
+`f : E →L[ℝ] ℝ` on the ambient space. The paper instead speaks of a **continuous shadow value**
+`λ : Θ → ℝ` with price `∫ λ dμ`. The two match because every weak-\* continuous linear functional
+on `E = WeakDual ℝ C(Θ,ℝ)` is evaluation at some `λ ∈ C(Θ,ℝ)` — the standard fact that the dual of
+a weak-\* dual is the original space. `exists_eq_evalCLM` proves it, and `exists_shadow` reads off
+the paper's form `f (emb μ) = ∫ λ dμ`.
+
+The argument is purely functional-analytic, and in particular avoids any density statement about
+finitely supported measures (which Mathlib does not have):
+
+1. `x ↦ ‖f x‖` is a continuous seminorm, so by `WithSeminorms.bound_of_continuous` it is dominated
+   by `C • s.sup p` for a **finite** `s : Finset C(Θ,ℝ)`, where `p l x = ‖x l‖` is the defining
+   seminorm family of the weak-\* topology.
+2. Hence `⋂_{l ∈ s} ker (evalCLM l) ⊆ ker f`, so `mem_span_of_iInf_ker_le_ker` puts `f` in the span
+   of `{evalCLM l : l ∈ s}`.
+3. `evalCLM` is linear in `l`, so that span element is `evalCLM (∑ᵢ cᵢ • lᵢ)`.
+-/
+
+variable [MeasurableSpace Θ] [BorelSpace Θ]
+
+omit [MeasurableSpace Θ] [BorelSpace Θ] in
+/-- **The dual of `E` is `C(Θ,ℝ)`**: every weak-\* continuous linear functional on
+`E = WeakDual ℝ C(Θ,ℝ)` is evaluation at a single continuous function. This is what turns the
+abstract supporting functional of `nogain_iff` into the paper's continuous shadow value `λ`. -/
+theorem exists_eq_evalCLM (f : E Θ →L[ℝ] ℝ) : ∃ l : C(Θ, ℝ), f = evalCLM l := by
+  classical
+  -- The defining seminorm family of the weak-* topology: `p l x = ‖x l‖`.
+  set B := topDualPairing ℝ C(Θ, ℝ) with hB
+  set p : C(Θ, ℝ) → Seminorm ℝ (E Θ) := B.toSeminormFamily with hpdef
+  have hp : WithSeminorms p := B.weakBilin_withSeminorms
+  -- `q x = ‖f x‖` is a continuous seminorm on `E`.
+  set q : Seminorm ℝ (E Θ) := (normSeminorm ℝ ℝ).comp f.toLinearMap with hqdef
+  have hqc : Continuous q := continuous_norm.comp f.continuous
+  obtain ⟨s, C, _hC, hle⟩ := Seminorm.bound_of_continuous hp q hqc
+  -- Step 2: the kernels of the finitely many evaluations `l ∈ s` sit inside `ker f`.
+  have hker : ⨅ l : (s : Finset C(Θ, ℝ)),
+      LinearMap.ker (evalCLM (l : C(Θ, ℝ))).toLinearMap ≤ LinearMap.ker f.toLinearMap := by
+    intro x hx
+    simp only [Submodule.mem_iInf, LinearMap.mem_ker,
+      ContinuousLinearMap.coe_coe] at hx ⊢
+    have hpapp : ∀ (l : C(Θ, ℝ)) (y : E Θ), p l y = ‖y l‖ := fun _ _ => rfl
+    have hzero : (s.sup p) x = 0 := by
+      rw [Seminorm.finset_sup_apply]
+      norm_cast
+      refine le_antisymm (Finset.sup_le fun l hl => ?_) bot_le
+      have hl0 : p l x = 0 := by
+        rw [hpapp, show (x l : ℝ) = 0 from hx ⟨l, hl⟩, norm_zero]
+      simp [hl0]
+    have h1 : q x ≤ (C • s.sup p) x := hle x
+    rw [smul_apply, hzero, smul_zero] at h1
+    have h2 : ‖f x‖ ≤ 0 := h1
+    simpa using le_antisymm h2 (norm_nonneg _)
+  -- Step 3: `f` is a linear combination of those evaluations.
+  obtain ⟨c, hc⟩ :=
+    (Submodule.mem_span_range_iff_exists_fun ℝ).1 (mem_span_of_iInf_ker_le_ker hker)
+  refine ⟨∑ l : (s : Finset C(Θ, ℝ)), c l • (l : C(Θ, ℝ)), ?_⟩
+  ext x
+  have hx := LinearMap.congr_fun hc x
+  simp only [LinearMap.coe_sum, Finset.sum_apply, LinearMap.smul_apply,
+    ContinuousLinearMap.coe_coe, smul_eq_mul] at hx
+  change f x = x _
+  rw [map_sum]
+  simp only [map_smul, smul_eq_mul]
+  exact hx.symm
+
+/-- **The supporting functional is a shadow value.** Every weak-\* continuous linear functional on
+`E` acts on embedded beliefs exactly as the paper's price `ℓ(μ) = ∫ λ dμ` for a continuous
+`λ : Θ → ℝ`. This is the bridge from `Concavification.nogain_iff`'s abstract `f` to
+`thm:nogain-delta-eps`'s shadow value. -/
+theorem exists_shadow (f : E Θ →L[ℝ] ℝ) :
+    ∃ l : C(Θ, ℝ), ∀ μ : ProbabilityMeasure Θ, f (emb μ) = ∫ x, l x ∂(μ : Measure Θ) := by
+  obtain ⟨l, hl⟩ := exists_eq_evalCLM f
+  exact ⟨l, fun μ => by rw [hl]; exact evalCLM_emb l μ⟩
+
+end Duality
+
 end BeliefSpace

@@ -248,5 +248,90 @@ theorem toDateValues_U [∀ t, Nonempty (H t)] [∀ t μ, IsProbabilityMeasure (
     (μ : ProbabilityMeasure Θ) :
     (toDateValues mH R Rtrunc Pcond hb hbV hsel hzero 𝒢 hVU).U t μ = U mH R Pcond 𝒢 t μ := rfl
 
+
+/-! ### The stopping form: what Assumption 1 actually buys (paper `lem:stopping-form`)
+
+The paper's proof is an economic argument: *"By Assumption 1 the resource is allocated at most once.
+At date `t` the seller **either allocates**, with within-period payoff `V_t`, **or defers**, reaching
+the date-`(t+1)` continuation at the updated posterior; **the larger of the two**"* — with the formal
+private-history argument deferred to an appendix and the Snell-envelope step cited to
+Peskir--Shiryaev.
+
+Assumption 1 lives *below* the abstraction boundary used here: it is a statement about the game
+primitives (allocation happens at most once, and terminates the problem), whereas `R` and `Rtrunc`
+enter as unrelated parameters. So the recursion genuinely **cannot** be derived at this level;
+assuming a relation between `R` and `Rtrunc` would only relocate the assumption.
+
+What *can* be done, and is done here, is to split the recursion into the part that follows from
+mere **availability** and the part that is the real content of Assumption 1, **exhaustiveness**:
+
+* availability of stopping (`hstop_mem`) and of deferring (`hdefer_mem`) gives
+  `max {V_t, defer} ≤ U_t` — a **theorem** (`le_stopping_max`);
+* the converse needs "there is no third option at date `t`" (`hexhaustive`), which is exactly what
+  the single-shot resource buys. That is the *only* thing still assumed, and it is now the paper's
+  own sentence rather than the algebraic conclusion.
+
+`Dfr t μ` abstracts the set of date-`t` payoffs attainable by deferring; the paper identifies its
+supremum with `∫ U_{t+1}(S_{t+1}) dP_t^μ`. -/
+
+variable (Dfr : ℕ → ProbabilityMeasure Θ → Set ℝ)
+
+/-- **Availability ⇒ one inequality, proved.** If stopping now and deferring are both available at
+date `t` (their payoff sets sit inside the date-`t` feasible set), then the seller's value dominates
+both, hence their maximum. No appeal to Assumption 1 is needed for this direction. -/
+theorem le_stopping_max [∀ t, Nonempty (H t)] [∀ t μ, IsProbabilityMeasure (Pcond t μ)] {M : ℝ}
+    (hb : ∀ (t : ℕ) (Γ : Ω → H t) (ω : Ω) (r : ℝ), r ∈ R t Γ ω → r ≤ M)
+    (hselV : ∀ (t : ℕ) (Γ : Ω → H t) (μ : ProbabilityMeasure Θ),
+      ∃ ρ, ρ ∈ Sel Rtrunc t Γ ∧ Integrable ρ (Pcond t μ))
+    (hDne : ∀ t μ, (Dfr t μ).Nonempty)
+    (𝒢 : Richness Ω) (t : ℕ) (μ : ProbabilityMeasure Θ)
+    (hstop_mem : feasible mH Rtrunc Pcond 𝒢 t μ ⊆ feasible mH R Pcond 𝒢 t μ)
+    (hdefer_mem : Dfr t μ ⊆ feasible mH R Pcond 𝒢 t μ) :
+    max (V mH Rtrunc Pcond 𝒢 t μ) (sSup (Dfr t μ)) ≤ U mH R Pcond 𝒢 t μ :=
+  max_le
+    (csSup_le_csSup (feasible_bddAbove mH R Pcond hb 𝒢 t μ)
+      (feasible_nonempty mH Rtrunc Pcond hselV 𝒢 t μ) hstop_mem)
+    (csSup_le_csSup (feasible_bddAbove mH R Pcond hb 𝒢 t μ) (hDne t μ) hdefer_mem)
+
+/-- **Exhaustiveness ⇒ the other inequality.** If every date-`t` feasible payoff arises either by
+stopping now or by deferring — the formal content of Assumption 1 (single-shot resource: allocation
+happens at most once, and allocating terminates the problem) — then the value is at most the larger
+of the two branches. `[strengthening]` This is the *only* remaining assumed ingredient. -/
+theorem stopping_max_le [∀ t, Nonempty (H t)] [∀ t μ, IsProbabilityMeasure (Pcond t μ)] {M : ℝ}
+    (hbV : ∀ (t : ℕ) (Γ : Ω → H t) (ω : Ω) (r : ℝ), r ∈ Rtrunc t Γ ω → r ≤ M)
+    (hsel : ∀ (t : ℕ) (Γ : Ω → H t) (μ : ProbabilityMeasure Θ),
+      ∃ ρ, ρ ∈ Sel R t Γ ∧ Integrable ρ (Pcond t μ))
+    (hDbdd : ∀ t μ, BddAbove (Dfr t μ))
+    (𝒢 : Richness Ω) (t : ℕ) (μ : ProbabilityMeasure Θ)
+    (hexhaustive :
+      feasible mH R Pcond 𝒢 t μ ⊆ feasible mH Rtrunc Pcond 𝒢 t μ ∪ Dfr t μ) :
+    U mH R Pcond 𝒢 t μ ≤ max (V mH Rtrunc Pcond 𝒢 t μ) (sSup (Dfr t μ)) := by
+  refine csSup_le (feasible_nonempty mH R Pcond hsel 𝒢 t μ) ?_
+  intro r hr
+  rcases hexhaustive hr with h | h
+  · exact le_trans (le_csSup (feasible_bddAbove mH Rtrunc Pcond hbV 𝒢 t μ) h) (le_max_left _ _)
+  · exact le_trans (le_csSup (hDbdd t μ) h) (le_max_right _ _)
+
+/-- **The paper's stopping form**, assembled: availability (proved) plus exhaustiveness (the content
+of Assumption 1). Compare `DMC.SingleShot.stopping`, which postulates this equation outright; here
+the algebra is derived and only the stop-or-defer dichotomy is assumed. -/
+theorem stopping_form [∀ t, Nonempty (H t)] [∀ t μ, IsProbabilityMeasure (Pcond t μ)] {M : ℝ}
+    (hb : ∀ (t : ℕ) (Γ : Ω → H t) (ω : Ω) (r : ℝ), r ∈ R t Γ ω → r ≤ M)
+    (hbV : ∀ (t : ℕ) (Γ : Ω → H t) (ω : Ω) (r : ℝ), r ∈ Rtrunc t Γ ω → r ≤ M)
+    (hsel : ∀ (t : ℕ) (Γ : Ω → H t) (μ : ProbabilityMeasure Θ),
+      ∃ ρ, ρ ∈ Sel R t Γ ∧ Integrable ρ (Pcond t μ))
+    (hselV : ∀ (t : ℕ) (Γ : Ω → H t) (μ : ProbabilityMeasure Θ),
+      ∃ ρ, ρ ∈ Sel Rtrunc t Γ ∧ Integrable ρ (Pcond t μ))
+    (hDne : ∀ t μ, (Dfr t μ).Nonempty) (hDbdd : ∀ t μ, BddAbove (Dfr t μ))
+    (𝒢 : Richness Ω) (t : ℕ) (μ : ProbabilityMeasure Θ)
+    (hstop_mem : feasible mH Rtrunc Pcond 𝒢 t μ ⊆ feasible mH R Pcond 𝒢 t μ)
+    (hdefer_mem : Dfr t μ ⊆ feasible mH R Pcond 𝒢 t μ)
+    (hexhaustive :
+      feasible mH R Pcond 𝒢 t μ ⊆ feasible mH Rtrunc Pcond 𝒢 t μ ∪ Dfr t μ) :
+    U mH R Pcond 𝒢 t μ = max (V mH Rtrunc Pcond 𝒢 t μ) (sSup (Dfr t μ)) :=
+  le_antisymm
+    (stopping_max_le mH R Rtrunc Pcond Dfr hbV hsel hDbdd 𝒢 t μ hexhaustive)
+    (le_stopping_max mH R Rtrunc Pcond Dfr hb hselV hDne 𝒢 t μ hstop_mem hdefer_mem)
+
 end Paper
 end DMC

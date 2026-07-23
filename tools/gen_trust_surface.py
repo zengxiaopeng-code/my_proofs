@@ -21,17 +21,26 @@ ENVS = ("lemma", "step", "definition", "faithcheck", "theorem", "proposition")
 # ---- 人工维护的信任面清单 ----------------------------------------------------
 # covers: 本项覆盖的 (blueprint label, tag) 对;node 为 None 表示"尚无 blueprint 节点"
 ITEMS = [
- dict(sev="strengthening", node="def:singleshot", covers=[("def:singleshot","strengthening")],
+ dict(sev="strengthening", node="def:singleshot", covers=[("def:singleshot","strengthening"),("fc:stop-le","strengthening")],
    title=r"The stopping form is assumed, not derived",
    lean=r"\texttt{DMC.SingleShot.stopping}",
    paper=r"The paper \emph{derives} $U_t=\max\{V_t,\mathbb E[U_{t+1}\mid\mu]\}$ (\texttt{eq:stopping-form}): "
          r"under Assumption~1 the continuation value is the \emph{Snell envelope} of the truncation "
          r"values, via \texttt{lem:stopping-form}.",
-   why=r"This is the \textbf{only} remaining assumed item of the model layer proper. Three former "
-       r"axioms (\texttt{V\_nonneg}, \texttt{U\_bddAbove}, \texttt{V\_le\_U}) now reduce to it or to "
-       r"paper primitives.",
-   discharge=r"Formalize the optimal-stopping argument on the belief martingale (least superharmonic "
-             r"majorant / Snell envelope) and derive it from Assumption~1."),
+   why=r"\textbf{Now sharpened.} The equation has been split: \emph{availability} of stopping and of "
+       r"deferring already gives $\max\{V_t,\text{defer}\}\le U_t$ as a \textbf{theorem} "
+       r"(\texttt{DMC.Paper.le\_stopping\_max}). What is still assumed is only the converse, i.e.\ "
+       r"\emph{exhaustiveness}: every date-$t$ feasible payoff arises by stopping now or by deferring "
+       r"(\texttt{DMC.Paper.stopping\_max\_le}). That dichotomy \emph{is} the formal content of "
+       r"Assumption~1, so what remains assumed is now the paper's own sentence rather than the "
+       r"algebraic conclusion. \texttt{DMC.SingleShot.stopping} still postulates the whole equation.",
+   discharge=r"Assumption~1 lives \emph{below} this abstraction boundary (it constrains the game "
+             r"primitives, while $\mathcal R_t^{\Gamma}$ and $\mathcal V_t^{\Gamma}$ enter as unrelated "
+             r"parameters), so exhaustiveness cannot be derived here without relocating the assumption. "
+             r"Discharging it means modelling the allocation/termination structure of the game --- "
+             r"including the private-history argument the paper defers to its appendix. The second "
+             r"equality (Snell envelope over stopping times) additionally needs optional stopping, "
+             r"which the paper cites to Peskir--Shiryaev."),
  dict(sev="assumed", node="def:selections", covers=[("def:selections","deviation")],
    title=r"Existence of a measurable payoff selection is a hypothesis",
    lean=r"the hypothesis \texttt{hsel} of \texttt{DMC.Paper.U\_mono\_of\_le}, "

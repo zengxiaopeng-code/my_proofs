@@ -182,4 +182,66 @@ theorem nogain_of_shadow (Dpost Drich : DateValues Θ)
   · intro μ; simpa using h2 μ
   · simpa using h3
 
+/-- **No-gain, necessity direction — verbatim in the paper's own terms
+(`thm:nogain-delta-eps`).**
+
+If the richer public state generates no additional value at the prior, then for every `ε > 0` a
+continuous shadow value `λ ∈ C(Θ,ℝ)` exists satisfying *posterior support*, *richer-state cap* and
+*tightness at the prior*.
+
+The abstract theorem only produces a continuous linear functional `f` on the ambient space `E`
+plus a constant `c`. `BeliefSpace.exists_shadow` identifies `f` as integration against some
+`λ₀ ∈ C(Θ)`, and the constant is absorbed into the shadow value as `λ := λ₀ + c` — legitimate
+precisely because the beliefs are *probability* measures, so `∫ (λ₀ + c) dμ = ∫ λ₀ dμ + c`. -/
+theorem shadow_of_nogain (Dpost Drich : DateValues Θ)
+    (h : ∀ t μ, Dpost.U t μ ≤ Drich.U t μ) (S₀ : ProbabilityMeasure Θ)
+    (husc : UpperSemicontinuousOn
+      (concF (Set.range (emb : ProbabilityMeasure Θ → E Θ)) (envelopeE Drich))
+      (Set.range emb))
+    (hnogain : concFBelief Drich.envelope S₀ = concFBelief Dpost.envelope S₀) :
+    ∀ ε > 0, ∃ l : C(Θ, ℝ),
+      (∀ μ : ProbabilityMeasure Θ, Dpost.envelope μ ≤ ∫ x, l x ∂(μ : Measure Θ)) ∧
+      (∀ μ : ProbabilityMeasure Θ, Drich.envelope μ ≤ ∫ x, l x ∂(μ : Measure Θ)) ∧
+      (∫ x, l x ∂(S₀ : Measure Θ) ≤ concFBelief Dpost.envelope S₀ + ε) := by
+  rw [nogain_belief_conc Dpost Drich h S₀ husc] at hnogain
+  intro ε hε
+  obtain ⟨f, c, h1, h2, h3⟩ := hnogain ε hε
+  obtain ⟨l₀, hl₀⟩ := exists_shadow f
+  have key : ∀ μ : ProbabilityMeasure Θ,
+      ∫ x, (l₀ + ContinuousMap.const Θ c) x ∂(μ : Measure Θ) = f (emb μ) + c := by
+    intro μ
+    have hadd : ∫ x, (l₀ x + c) ∂(μ : Measure Θ)
+        = (∫ x, l₀ x ∂(μ : Measure Θ)) + c := by
+      rw [integral_add (integrable_contMap _ l₀) (integrable_const c)]
+      simp
+    simpa [hl₀ μ] using hadd
+  refine ⟨l₀ + ContinuousMap.const Θ c, ?_, ?_, ?_⟩
+  · intro μ; rw [key μ]; exact h1 μ
+  · intro μ; rw [key μ]; exact h2 μ
+  · rw [key S₀]; exact h3
+
+/-- **`thm:nogain-delta-eps`, complete and verbatim.**
+A richer public state (`U_post ≤ U_rich`) generates **no additional ex-ante value at the prior
+`S₀`** — the finite concavifications of the two envelopes agree at `S₀` — **if and only if** for
+every `ε > 0` there is a continuous shadow value function `λ_ε : Θ → ℝ` with
+
+* \ref{cond:posterior-support} `sup_t U_t^{σ(S_t)}(μ) ≤ ∫ λ_ε dμ` for all `μ ∈ Δ(Θ)`;
+* \ref{cond:richer-cap} `sup_t U_t^{𝒢_t}(μ) ≤ ∫ λ_ε dμ` for all `μ ∈ Δ(Θ)`;
+* \ref{cond:tightness} `∫ λ_ε dS₀ ≤ conc_f[sup_t U_t^{σ(S_t)}](S₀) + ε`.
+
+Every object is the paper's own: beliefs in `Δ(Θ)`, `conc_f` as the supremum over finite
+Bayes-plausible splits (`concFBelief`), the shadow value as a genuine `λ ∈ C(Θ,ℝ)` integrated
+against the belief. `husc` is the paper's regularity assumption. -/
+theorem nogain_iff_shadow (Dpost Drich : DateValues Θ)
+    (h : ∀ t μ, Dpost.U t μ ≤ Drich.U t μ) (S₀ : ProbabilityMeasure Θ)
+    (husc : UpperSemicontinuousOn
+      (concF (Set.range (emb : ProbabilityMeasure Θ → E Θ)) (envelopeE Drich))
+      (Set.range emb)) :
+    concFBelief Drich.envelope S₀ = concFBelief Dpost.envelope S₀ ↔
+      ∀ ε > 0, ∃ l : C(Θ, ℝ),
+        (∀ μ : ProbabilityMeasure Θ, Dpost.envelope μ ≤ ∫ x, l x ∂(μ : Measure Θ)) ∧
+        (∀ μ : ProbabilityMeasure Θ, Drich.envelope μ ≤ ∫ x, l x ∂(μ : Measure Θ)) ∧
+        (∫ x, l x ∂(S₀ : Measure Θ) ≤ concFBelief Dpost.envelope S₀ + ε) :=
+  ⟨shadow_of_nogain Dpost Drich h S₀ husc, nogain_of_shadow Dpost Drich h S₀ husc⟩
+
 end DMC

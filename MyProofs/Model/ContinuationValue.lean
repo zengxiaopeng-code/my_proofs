@@ -56,6 +56,13 @@ theorem DateValues.le_envelope (D : DateValues Θ) (t : ℕ) (μ : ProbabilityMe
   obtain ⟨M, hM⟩ := D.U_bddAbove
   exact le_ciSup (f := fun t => D.U t μ) ⟨M, by rintro _ ⟨t, rfl⟩; exact hM t μ⟩ t
 
+/-- A cap holds for the envelope exactly when it holds date by date. This is what lets the paper's
+conditions — written date-wise as `U_t(μ) ≤ ∫ λ dμ` — be read off the envelope `g = sup_t U_t`, and
+conversely. -/
+theorem DateValues.envelope_le_iff (D : DateValues Θ) (μ : ProbabilityMeasure Θ) (c : ℝ) :
+    D.envelope μ ≤ c ↔ ∀ t, D.U t μ ≤ c :=
+  ⟨fun h t => (D.le_envelope t μ).trans h, fun h => ciSup_le h⟩
+
 /-- A **richer** conditioning weakly raises the envelope: if `U_post ≤ U_rich` date by date, then
 `g = envelope U_post ≤ ĝ = envelope U_rich`. This is the `g ≤ ĝ` used throughout §3. -/
 theorem DateValues.envelope_mono {Dpost Drich : DateValues Θ}

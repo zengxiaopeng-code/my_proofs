@@ -1,0 +1,88 @@
+% 由 tools/gen_trust_surface.py 生成 —— 请勿手改。
+% 内容与 blueprint 各节点的 [tag] 双向校验一致(不一致则生成脚本报错)。
+
+\chapter{Trust surface: what is still assumed}
+
+Green on this site means the Lean \textbf{kernel checked a proof against a stated Lean proposition}.
+It never means ``this matches the paper''. That second step is a human translation, and wherever it
+is not fully discharged, the residue is listed \emph{here} --- in one place, rather than scattered
+across nodes and docstrings.
+
+This chapter is generated from the faithfulness tags on the nodes, and the generator \textbf{fails}
+if a tag exists that this list does not cover, or if this list refers to a tag that no longer exists.
+So it cannot silently go out of date.
+
+\medskip
+\noindent\textbf{Not counted as gaps.} The paper itself never constructs the strategy--belief profiles $\mathcal B_t$, the
+sequentially rational Bayesian equilibria $\mathcal E_t$, or the payoff $\pi_t$: it constrains them by
+Assumption~2 and works with the induced payoff correspondence $\mathcal R_t^{\Gamma_t}$. The Lean
+development stops at exactly the same place. So their absence is \textbf{not} a gap in the
+formalization --- it is fidelity to the paper's own abstraction boundary.
+
+\section*{Strengthening --- Lean assumes something the paper \emph{derives}}
+\begin{itemize}
+  \item[] \textbf{The stopping form is assumed, not derived}\\
+  Blueprint: \ref{def:singleshot}. Lean: \texttt{DMC.SingleShot.stopping}.
+  \par\smallskip\emph{What the paper says.} The paper \emph{derives} $U_t=\max\{V_t,\mathbb E[U_{t+1}\mid\mu]\}$ (\texttt{eq:stopping-form}): under Assumption~1 the continuation value is the \emph{Snell envelope} of the truncation values, via \texttt{lem:stopping-form}.
+  \par\smallskip\emph{Why it is not discharged.} This is the \textbf{only} remaining assumed item of the model layer proper. Three former axioms (\texttt{V\_nonneg}, \texttt{U\_bddAbove}, \texttt{V\_le\_U}) now reduce to it or to paper primitives.
+  \par\smallskip\emph{What would discharge it.} Formalize the optimal-stopping argument on the belief martingale (least superharmonic majorant / Snell envelope) and derive it from Assumption~1.
+\end{itemize}
+\begin{itemize}
+  \item[] \textbf{Regularity is assumed on all of $K$, not just at the prior}\\
+  \textbf{No blueprint node yet.} Lean: the \texttt{husc} hypothesis of \texttt{DMC.nogain\_belief}; see \texttt{Foundations/Concavification}.
+  \par\smallskip\emph{What the paper says.} Assumption~3 (\texttt{ass:regularity}) requires $\operatorname{conc}_f[\sup_t U_t]$ to be upper semicontinuous \textbf{at the prior $S_0$} only.
+  \par\smallskip\emph{Why it is not discharged.} Lean assumes upper semicontinuity on the whole of $K$ --- a \emph{stronger} hypothesis, hence a \emph{weaker} theorem. Sound, but not the paper's statement. \textbf{Not yet visible in this blueprint}: \S3 has no chapter here.
+  \par\smallskip\emph{What would discharge it.} Weaken to the one-point condition, or add a \S3 chapter and tag it in situ.
+\end{itemize}
+
+\section*{Assumed --- a paper lemma taken as a hypothesis}
+\begin{itemize}
+  \item[] \textbf{Existence of a measurable payoff selection is a hypothesis}\\
+  Blueprint: \ref{def:selections}. Lean: the hypothesis \texttt{hsel} of \texttt{DMC.Paper.U\_mono\_of\_le}, \texttt{U\_bddAbove\_of\_bound}, \texttt{toDateValues}.
+  \par\smallskip\emph{What the paper says.} \texttt{lem:selection-exists}: under Assumption~2(i)--(iii), $\mathcal R_t^{\Gamma_t}$ admits a universally measurable selection, by the \textbf{Jankov--von Neumann} selection theorem (Kechris, Thm~18.1).
+  \par\smallskip\emph{Why it is not discharged.} Mathlib has \texttt{AnalyticSet} but \textbf{neither} a \texttt{UniversallyMeasurable} predicate \textbf{nor} Jankov--von Neumann (both verified absent). So the paper's proof cannot currently be transcribed at all.
+  \par\smallskip\emph{What would discharge it.} Either contribute universal measurability $+$ Jankov--von Neumann to Mathlib (a genuine library gap, comparable in size to the $\Delta(\Theta)$ work), or formalize the finite-strategy case the paper's own Remark singles out, where measurable selection is elementary.
+\end{itemize}
+
+\section*{Gap --- a paper statement with no Lean counterpart yet}
+\begin{itemize}
+  \item[] \textbf{The game-theoretic bridge $R(\mathcal M)$ is not formalized}\\
+  \textbf{No blueprint node yet.} Lean: ---.
+  \par\smallskip\emph{What the paper says.} \texttt{prop:value-representation}: $\sup_{\mathcal M}R(\mathcal M)=(\operatorname{conc}_f[\sup_t U_t^{\sigma(Z_t)}])(S_0)$, together with the calendar $\mathcal M$ and $R(\mathcal M)$ themselves.
+  \par\smallskip\emph{Why it is not discharged.} The main theorem is routed \emph{around} this bridge: no-gain is taken in its post-representation equivalent form, which is pure convex analysis. So the bridge does not gate the main result --- but the paper's own \S2.2 conclusion is not covered.
+  \par\smallskip\emph{What would discharge it.} Formalize the lower bound (branchwise selectors $+$ sequential pasting) and \texttt{lem:upper-bound}; both depend on the selection machinery above.
+\end{itemize}
+
+\section*{Deviation --- Lean's notion differs from the paper's}
+\begin{itemize}
+  \item[] \textbf{\texttt{Sel} uses Borel, not universal, measurability}\\
+  Blueprint: \ref{def:selections}. Lean: \texttt{DMC.Paper.Sel}.
+  \par\smallskip\emph{What the paper says.} The paper's $\Sel(\mathcal R_t^{\Gamma_t})$ consists of \emph{universally} measurable selections.
+  \par\smallskip\emph{Why it is not discharged.} Same Mathlib gap as above. The deviation shrinks the feasible set, so the $U_t$ defined here is $\le$ the paper's --- i.e.\ it errs in the \textbf{conservative} direction.
+  \par\smallskip\emph{What would discharge it.} Same as the previous item.
+\end{itemize}
+
+\section*{Encoding --- a modelling choice, transparency machine-checked}
+\begin{itemize}
+  \item[] \textbf{\texttt{condExp} is carried as an abstract operator}\\
+  Blueprint: \ref{def:singleshot}. Lean: \texttt{DMC.SingleShot.condExp} with \texttt{condExp\_mono}, \texttt{affine\_harmonic}.
+  \par\smallskip\emph{What the paper says.} $\mathbb E[\varphi(S_{t+1})\mid S_t=\mu]$, the conditional expectation along the posterior process.
+  \par\smallskip\emph{Why it is not discharged.} Only the two properties actually used downstream are assumed (positivity/monotonicity and Bayes-plausibility). Bayes-plausibility is the operative form of the posterior-martingale property, which \emph{is} fully proved (paper Lemma~1).
+  \par\smallskip\emph{What would discharge it.} Define \texttt{condExp} from the conditional law $\mathbb P_t^\mu$ and the posterior process, and derive both properties.
+\end{itemize}
+\begin{itemize}
+  \item[] \textbf{The allocation date is an encoding choice}\\
+  Blueprint: \ref{def:allocdate}. Lean: \texttt{DMC.AllocDate} $=$ \texttt{Option \{n : $\mathbb N$ // 1 $\le$ n\}}.
+  \par\smallskip\emph{What the paper says.} $\tau\in\{1,2,\dots\}\cup\{\varnothing\}$.
+  \par\smallskip\emph{Why it is not discharged.} Residual risk is minimal and machine-checked (Faithfulness check on $\emptyset$ vs.\ dates, injectivity, and $\tau\ge1$). Note the type is currently \emph{not used} anywhere in the development.
+  \par\smallskip\emph{What would discharge it.} Nothing outstanding; either put it to use or drop it.
+\end{itemize}
+
+\section*{Weakening --- Lean assumes \emph{less} than the paper (safe)}
+\begin{itemize}
+  \item[] \textbf{\texttt{DateValues} is an interface, weaker than the paper's definitions}\\
+  Blueprint: \ref{def:datevalues}. Lean: \texttt{DMC.DateValues}.
+  \par\smallskip\emph{What the paper says.} The paper defines $U_t,V_t$ as suprema; \texttt{DateValues} records only the properties \S3 uses.
+  \par\smallskip\emph{Why it is not discharged.} No longer postulated: it is \emph{constructed} by \texttt{DMC.Paper.toDateValues} from the paper's definitions, and \texttt{toDateValues\_U} checks the \texttt{U} field really is $U_t^{\mathcal G}$. Its residual trust reduces to the stopping form above.
+  \par\smallskip\emph{What would discharge it.} Nothing beyond the stopping form.
+\end{itemize}
